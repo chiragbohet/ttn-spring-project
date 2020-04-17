@@ -35,6 +35,7 @@ public class Address {
     @Column(name = "LABEL")
     String label;   // TODO : Doubt - should this be a enum instead?
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "USER_ID")
     User user;
 }

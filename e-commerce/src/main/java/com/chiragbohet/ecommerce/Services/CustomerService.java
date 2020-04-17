@@ -1,17 +1,29 @@
 package com.chiragbohet.ecommerce.Services;
 
+import com.chiragbohet.ecommerce.Dtos.CustomerAdminApiDto;
 import com.chiragbohet.ecommerce.Dtos.CustomerRegistrationDto;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
 import com.chiragbohet.ecommerce.Exceptions.UserAlreadyExistsException;
+import com.chiragbohet.ecommerce.Exceptions.UserNotFoundException;
 import com.chiragbohet.ecommerce.Repositories.ConfirmationTokenRepository;
 import com.chiragbohet.ecommerce.Repositories.CustomerRepository;
 import com.chiragbohet.ecommerce.Utilities.ConfirmationToken;
+import com.chiragbohet.ecommerce.Utilities.EmailSenderService;
+import com.chiragbohet.ecommerce.Utilities.ObjectMapperUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class CustomerService {
@@ -25,26 +37,69 @@ public class CustomerService {
     @Autowired
     EmailSenderService emailSenderService;
 
-    /***
-     * Sets required fields for a customer to function like isActive, isEnabled etc.
-     * @param customer
-     * @return customer with required fields set
-     */
-    Customer initializeNewCustomer(Customer customer){
-
-        customer.setActive(false);  // will be activated via email
-        customer.setDeleted(false);
-        customer.setAccountNonExpired(true);
-        customer.setAccountNonLocked(true);
-        customer.setCredentialsNonExpired(true);
-        customer.setEnabled(true);
-
-        return customer;
-    }
-
     private ModelMapper modelMapper = new ModelMapper();
 
-    public ResponseEntity createNewCustomer(CustomerRegistrationDto customerRegistrationDto) throws UserAlreadyExistsException {
+    public ResponseEntity activateCustomer(Long id){
+
+        Optional<Customer> customer = customerRepository.findById(id);
+
+        if(customer.isPresent())
+        {
+            if(!customer.get().isActive())
+            {
+                customer.get().setActive(true);
+                customerRepository.save(customer.get());
+                emailSenderService.sendEmail(emailSenderService.getCustomerActivationMail(customer.get().getEmail()));
+            }
+                return new ResponseEntity<String>("customer account with id : " + id + " activated.",null,HttpStatus.OK);
+        }
+        else
+            throw new UserNotFoundException("No user found with id : " + id);
+
+
+    }
+
+    public ResponseEntity deactivateCustomer(Long id){
+
+        Optional<Customer> customer = customerRepository.findById(id);
+
+        if(customer.isPresent())
+        {
+            if(customer.get().isActive())
+            {
+                customer.get().setActive(false);
+                customerRepository.save(customer.get());
+                emailSenderService.sendEmail(emailSenderService.getCustomerDeactivationMail(customer.get().getEmail()));
+            }
+            return new ResponseEntity<String>("customer account with id : " + id + " deactivated.",null,HttpStatus.OK);
+        }
+        else
+            throw new UserNotFoundException("No user found with id : " + id);
+
+    }
+
+
+    public ResponseEntity getAllCustomers(Optional<Integer> page, Optional<Integer> size, Optional<String> sortProperty, Optional<String> sortDirection)
+    {
+
+        Sort.Direction sortingDirection = sortDirection.get().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Page<Customer> customers =  customerRepository.findAll(PageRequest.of(page.get() ,size.get(), sortingDirection, sortProperty.get()));
+
+        List<CustomerAdminApiDto> customersInDTO = ObjectMapperUtils.mapAll(customers, CustomerAdminApiDto.class);
+
+        //Adding X-TOTAL-COUNT header representing total count of Employees
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.put("X-TOTAL-COUNT", Arrays.asList(String.valueOf(customerRepository.count())));
+
+        return new ResponseEntity<>(customersInDTO, headers, HttpStatus.OK);
+
+    }
+
+
+
+
+    public ResponseEntity registerNewCustomer(CustomerRegistrationDto customerRegistrationDto) throws UserAlreadyExistsException {
 
         Customer customer = modelMapper.map(customerRegistrationDto, Customer.class);   // converting DTO to POJO
 
@@ -52,39 +107,34 @@ public class CustomerService {
             throw new UserAlreadyExistsException("User already exists with email : " + customer.getEmail());
         else
             {
-                customerRepository.save(initializeNewCustomer(customer));   // persisting the Customer
+                customerRepository.save(customer);   // persisting the Customer
 
                 ConfirmationToken confirmationToken = new ConfirmationToken(customer);
                 confirmationTokenRepository.save(confirmationToken);
 
-                SimpleMailMessage mailMessage = new SimpleMailMessage();
-                mailMessage.setTo(customer.getEmail());
-                mailMessage.setSubject("Complete Registration!");
-                mailMessage.setFrom("chiragtest9654@gmail.com");
-                mailMessage.setText("To confirm your account, please click here : "
-                        +"http://localhost:8080/register/confirm?token="+confirmationToken.getConfirmationToken());
-
-                emailSenderService.sendEmail(mailMessage);
-
+                emailSenderService.sendEmail(emailSenderService.getCustomerActivationMail(customer.getEmail(), confirmationToken.getConfirmationToken()));
+                return ResponseEntity.status(HttpStatus.CREATED).build();
              }
 
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+
     }
 
     public String validateRegistrationToken(String userToken){
 
         ConfirmationToken foundToken = confirmationTokenRepository.findByConfirmationToken(userToken);
 
+        // TODO : add token expiration mechanism
         if(foundToken != null)
         {
             Customer customer = customerRepository.findByEmail(foundToken.getUser().getEmail());
             customer.setEnabled(true);
             customerRepository.save(customer);
+            confirmationTokenRepository.delete(foundToken);
             return "account verified";
         }
 
-        return "something went wrong!";
+        return "Invalid token!";
     }
 
 }

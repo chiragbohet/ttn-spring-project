@@ -1,6 +1,10 @@
 package com.chiragbohet.ecommerce.Security;
 
+import com.chiragbohet.ecommerce.Entities.UserRelated.Address;
+import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
+import com.chiragbohet.ecommerce.Entities.UserRelated.User;
 import com.chiragbohet.ecommerce.Repositories.RoleRepository;
+import com.chiragbohet.ecommerce.Repositories.SellerRepository;
 import com.chiragbohet.ecommerce.Repositories.UserRepository;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
 import com.chiragbohet.ecommerce.Repositories.CustomerRepository;
@@ -21,6 +25,9 @@ public class Bootstrap implements ApplicationRunner {
     CustomerRepository customerRepository;
 
     @Autowired
+    SellerRepository sellerRepository;
+
+    @Autowired
     RoleRepository roleRepository;
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -29,38 +36,52 @@ public class Bootstrap implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         if(userRepository.count()<1){
 
-            //addTestAdmin();
-            //addTestCustomer();
+            addTestSeller();
+            addTestCustomer();
+            addTestAdmin();
 
             System.out.println("Total users saved::"+userRepository.count());
 
         }
     }
 
-//    void addTestAdmin(){
-//
-//        Role ROLE_CUSTOMER = new Role("ROLE_CUSTOMER");
-//        Role ROLE_SELLER = new Role("ROLE_SELLER");
-//        Role ROLE_ADMIN = new Role("ROLE_ADMIN");
-//
-//        roleRepository.save(ROLE_ADMIN);
-//        roleRepository.save(ROLE_SELLER);
-//
-//
-//        User user3 = new Seller();
-//        user3.setEmail("chirag@gmail.com");
-//        user3.setPassword(passwordEncoder.encode("1234567Tt#"));
-//        //user3.addRoles(ROLE_ADMIN);
-//        user3.addRoles( roleRepository.findById(2L).get(), roleRepository.findById(1L).get());  //TODO : Error - org.springframework.dao.InvalidDataAccessApiUsageException: detached entity passed to persist
-//
-//        // spring security fields, mandatory for acc to function
-//        user3.setAccountNonExpired(true);
-//        user3.setAccountNonLocked(true);
-//        user3.setCredentialsNonExpired(true);
-//        user3.setEnabled(true);
-//        userRepository.save(user3);
-//
-//    }
+    void addTestSeller()
+    {
+        Seller seller = new Seller();
+
+        // common fields
+        seller.setFirstName("Test");
+        seller.setMiddleName("Seller");
+        seller.setEmail("testseller@localhost.com");
+        seller.setPassword(passwordEncoder.encode("pass"));
+
+        //seller specific fields
+        Address address = new Address();
+        address.setAddressLine("2nd Floor, NSL Techzone IT SEZ");
+        address.setCity("Noida");
+        address.setState("Uttar Pradesh");
+        address.setCountry("India");
+        address.setLabel("Primary");
+        address.setZipCode("201306");
+
+        seller.setCompanyContact("9999999999");
+        seller.setCompanyName("To The New");
+        seller.setAddress(address);
+        //address.setUser(seller); TODO : Fix this infinite loop
+        seller.setGst("18AABCT3518Q1ZV");
+
+
+        seller.setActive(false);  // will be activated by Admin
+        seller.setDeleted(false);
+        // spring security related fields
+        seller.setAccountNonExpired(true);
+        seller.setAccountNonLocked(true);
+        seller.setCredentialsNonExpired(true);
+        seller.setEnabled(true);
+        sellerRepository.save(seller);
+
+    }
+
 
     void addTestCustomer()
     {
@@ -70,15 +91,46 @@ public class Bootstrap implements ApplicationRunner {
         customer.setMiddleName("Customer");
         customer.setEmail("testcustomer@localhost.com");
         customer.setPassword(passwordEncoder.encode("pass"));
-        customer.setActive(true);
+        customer.setContact("9999999999");
+
+        customer.setActive(false);  // will be activated via email
         customer.setDeleted(false);
-        customer.setContact("99999999999");
+
+        // spring security related fields
         customer.setAccountNonExpired(true);
         customer.setAccountNonLocked(true);
         customer.setCredentialsNonExpired(true);
         customer.setEnabled(true);
-
+        customer.setEnabled(true);
         customerRepository.save(customer);
 
+    }
+
+    void addTestAdmin()
+    {
+        Customer admin = new Customer();
+
+        admin.setFirstName("Test");
+        admin.setMiddleName("Admin");
+        admin.setEmail("testadmin@localhost.com");
+        admin.setPassword(passwordEncoder.encode("pass"));
+        admin.setContact("9999999999");
+
+        admin.setActive(true);  // will be activated via email
+        admin.setDeleted(false);
+
+        // spring security related fields
+        admin.setAccountNonExpired(true);
+        admin.setAccountNonLocked(true);
+        admin.setCredentialsNonExpired(true);
+        admin.setEnabled(true);
+        admin.setEnabled(true);
+
+        // adding ADMIN role
+
+        Role ROLE_ADMIN = new Role("ROLE_ADMIN");
+        admin.addRoles(ROLE_ADMIN);
+
+        customerRepository.save(admin);
     }
 }

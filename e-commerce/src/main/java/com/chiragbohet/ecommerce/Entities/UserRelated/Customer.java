@@ -1,10 +1,13 @@
 package com.chiragbohet.ecommerce.Entities.UserRelated;
 
+import com.chiragbohet.ecommerce.Security.Role;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -17,8 +20,26 @@ public class Customer extends User {
     private String contact; //TODO : is this for Contact No? or something else?
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "USER_ID")
+    //@JoinColumn(name = "USER_ID")
     private Set<Address> addressSet;
+
+    // TODO : Uncomment this
+    public Customer()
+    {
+        List<Role> roles = new ArrayList<>();
+        Role ROLE_CUSTOMER = new Role("ROLE_CUSTOMER");
+        roles.add(ROLE_CUSTOMER);
+
+        this.setRoleList(roles);
+
+        this.setActive(false);  // will be activated via email
+        this.setDeleted(false);
+        // spring security related fields
+        this.setAccountNonExpired(true);
+        this.setAccountNonLocked(true);
+        this.setCredentialsNonExpired(true);
+        this.setEnabled(true);
+    }
 
     /***
      * Sets Address(s) given as input to the Address of the Customer
