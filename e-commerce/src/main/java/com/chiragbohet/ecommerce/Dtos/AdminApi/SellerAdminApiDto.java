@@ -1,4 +1,4 @@
-package com.chiragbohet.ecommerce.Dtos;
+package com.chiragbohet.ecommerce.Dtos.AdminApi;
 
 import com.chiragbohet.ecommerce.Entities.UserRelated.Address;
 import lombok.Getter;

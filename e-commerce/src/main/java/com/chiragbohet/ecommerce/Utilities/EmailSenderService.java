@@ -26,7 +26,7 @@ public class EmailSenderService {
     }
 
 
-    public SimpleMailMessage getCustomerActivationMail(String customerEmail, String confirmationToken)
+    public SimpleMailMessage getCustomerAwaitingActivationMail(String customerEmail, String confirmationToken)
     {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(customerEmail);
@@ -38,7 +38,7 @@ public class EmailSenderService {
         return mailMessage;
     }
 
-    public SimpleMailMessage getCustomerActivationMail(String customerEmail)
+    public SimpleMailMessage getCustomerRegistrationCompletedMail(String customerEmail)
     {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(customerEmail);
@@ -77,6 +77,26 @@ public class EmailSenderService {
         mailMessage.setSubject("Account deactivated!");
         mailMessage.setFrom(senderEmail);
         mailMessage.setText("Dear Customer, your account has been deactivated.\nPlease contact customer care for more details.");
+        return mailMessage;
+    }
+
+    public SimpleMailMessage getPasswordUpdatedMail(String email)
+    {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(email);
+        mailMessage.setSubject("Password Updated!");
+        mailMessage.setFrom(senderEmail);
+        mailMessage.setText("Dear User, your password was recently changed.\nIf this was not done by you, contact customer care immediately.");
+        return mailMessage;
+    }
+
+    public SimpleMailMessage getSellerAwaitingActivationMail(String email)
+    {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(email);
+        mailMessage.setSubject("Registration completed");
+        mailMessage.setFrom(senderEmail);
+        mailMessage.setText("Dear seller your account has been created and is waiting for an approval.");
         return mailMessage;
     }
 

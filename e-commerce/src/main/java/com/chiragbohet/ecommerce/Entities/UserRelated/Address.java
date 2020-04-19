@@ -38,4 +38,5 @@ public class Address {
     @ManyToOne
     @JoinColumn(name = "USER_ID")
     User user;
+
 }

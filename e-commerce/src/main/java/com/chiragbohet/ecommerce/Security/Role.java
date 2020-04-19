@@ -50,7 +50,9 @@ public class Role implements GrantedAuthority {
                 {
                     userList.add(user);
                     user.addRoles(this);
+
                 }
+
             }
         }
     }

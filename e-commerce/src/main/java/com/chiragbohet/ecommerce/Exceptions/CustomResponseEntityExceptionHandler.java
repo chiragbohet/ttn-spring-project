@@ -42,6 +42,17 @@ public class CustomResponseEntityExceptionHandler
         return new ResponseEntity(exceptionResponseFormat, HttpStatus.NOT_FOUND);
     }
 
+    // UserNotFoundException exception handler
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public final ResponseEntity<Object> ResourceNotFoundException(Exception ex, WebRequest request) throws Exception {
+        ExceptionResponseFormat exceptionResponseFormat =
+                new ExceptionResponseFormat(new Date(),
+                        ex.getMessage(),
+                        request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponseFormat, HttpStatus.NOT_FOUND);
+    }
+
     // UserAlreadyExistsException exception handler
     @ExceptionHandler(UserAlreadyExistsException.class)
     public final ResponseEntity<Object> handleUserAlreadyExistsException(Exception ex, WebRequest request) throws Exception {

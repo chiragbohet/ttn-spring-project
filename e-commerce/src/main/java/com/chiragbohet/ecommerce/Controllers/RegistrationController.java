@@ -1,8 +1,8 @@
 package com.chiragbohet.ecommerce.Controllers;
 
-import com.chiragbohet.ecommerce.Dtos.SellerRegistrationDto;
+import com.chiragbohet.ecommerce.Dtos.RegistrationApi.SellerRegistrationDto;
 import com.chiragbohet.ecommerce.Services.CustomerService;
-import com.chiragbohet.ecommerce.Dtos.CustomerRegistrationDto;
+import com.chiragbohet.ecommerce.Dtos.RegistrationApi.CustomerRegistrationDto;
 import com.chiragbohet.ecommerce.Services.SellerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

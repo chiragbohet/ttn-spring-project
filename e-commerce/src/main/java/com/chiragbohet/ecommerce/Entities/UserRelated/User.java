@@ -55,8 +55,8 @@ public abstract class User {
     @Column(name = "IS_ENABLED")
     private boolean isEnabled;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(name = "USER_ROLE", joinColumns = @JoinColumn(name = "USER_ID"), inverseJoinColumns = @JoinColumn(name = "ROLE_ID"))
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "USER_ROLE", joinColumns = @JoinColumn(name = "ROLE_ID"), inverseJoinColumns = @JoinColumn(name = "USER_ID"))
     private List<Role> roleList;
 
     public void addRoles(Role... roleArray)
@@ -72,6 +72,7 @@ public abstract class User {
                 {
                     roleList.add(role);
                     role.addUsers(this);
+
                 }
             }
         }

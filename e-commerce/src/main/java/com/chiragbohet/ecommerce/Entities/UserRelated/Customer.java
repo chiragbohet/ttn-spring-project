@@ -17,10 +17,9 @@ import java.util.Set;
 public class Customer extends User {
 
     @Column(name = "CONTACT")
-    private String contact; //TODO : is this for Contact No? or something else?
+    private String contact;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    //@JoinColumn(name = "USER_ID")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Address> addressSet;
 
     // TODO : Uncomment this
@@ -45,7 +44,7 @@ public class Customer extends User {
      * Sets Address(s) given as input to the Address of the Customer
      * @param addresses
      */
-    public void setAddress(Address... addresses)
+    public void addAddress(Address... addresses)
     {
         if(addresses != null)
         {
@@ -54,10 +53,31 @@ public class Customer extends User {
 
             for(Address address : addresses)
             {
-                address.setUser(this);
-                addressSet.add(address);
+                if(!addressSet.contains(address))
+                {
+                    addressSet.add(address);
+                    address.setUser(this);
+                }
             }
 
+        }
+    }
+
+    public void deleteAddress(Address... addresses)
+    {
+        if(addresses != null)
+        {
+            if(addressSet == null)
+                return;
+
+            for(Address address : addresses)
+            {
+                if(addressSet.contains(address))
+                {
+                    addressSet.remove(address);
+                    address.setUser(null);
+                }
+            }
         }
     }
 

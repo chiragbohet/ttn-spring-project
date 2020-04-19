@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ObjectMapperUtils {
@@ -52,7 +53,20 @@ public class ObjectMapperUtils {
      * @param <T>        type of entity in <code>entityList</code>
      * @return list of mapped object with <code><D></code> type.
      */
-    public static <D, T> List<D> mapAll(final Page<T> entityList, Class<D> outCLass) {
+    public static <D, T> List<D> mapAllList(final Collection<T> entityList, Class<D> outCLass) {
+        return entityList.stream()
+                .map(entity -> map(entity, outCLass))
+                .collect(Collectors.toList());
+    }
+
+    public static <D, T> Set<D> mapAllSet(final Collection<T> entityList, Class<D> outCLass) {
+        return entityList.stream()
+                .map(entity -> map(entity, outCLass))
+                .collect(Collectors.toSet());
+    }
+
+    // overridden version of above method to handle Page type
+    public static <D, T> List<D> mapAllPage(final Page<T> entityList, Class<D> outCLass) {
 
         return entityList.stream()
                 .map(entity -> map(entity, outCLass))

@@ -2,7 +2,6 @@ package com.chiragbohet.ecommerce.Security;
 
 import com.chiragbohet.ecommerce.Entities.UserRelated.Address;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
-import com.chiragbohet.ecommerce.Entities.UserRelated.User;
 import com.chiragbohet.ecommerce.Repositories.RoleRepository;
 import com.chiragbohet.ecommerce.Repositories.SellerRepository;
 import com.chiragbohet.ecommerce.Repositories.UserRepository;
@@ -102,6 +101,27 @@ public class Bootstrap implements ApplicationRunner {
         customer.setCredentialsNonExpired(true);
         customer.setEnabled(true);
         customer.setEnabled(true);
+
+        // address
+        Address address = new Address();
+        address.setAddressLine("2nd Floor, NSL Techzone IT SEZ");
+        address.setCity("Noida");
+        address.setState("Uttar Pradesh");
+        address.setCountry("India");
+        address.setLabel("Primary");
+        address.setZipCode("201306");
+        customer.addAddress(address);
+
+        Address address2 = new Address();
+        address2.setAddressLine("2nd Floor, NSL Techzone IT SEZ");
+        address2.setCity("Noida");
+        address2.setState("Uttar Pradesh");
+        address2.setCountry("India");
+        address2.setLabel("Primary");
+        address2.setZipCode("201306");
+
+        customer.addAddress(address2);
+
         customerRepository.save(customer);
 
     }
