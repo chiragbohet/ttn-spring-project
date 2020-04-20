@@ -20,6 +20,8 @@ public class ConfirmationToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public static final Long TOKEN_EXPIRATION_IN_SECONDS = (24*60*60L); // one day validity
+
     private String confirmationToken;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -35,6 +37,14 @@ public class ConfirmationToken {
         confirmationToken = UUID.randomUUID().toString();
     }
 
+
+    public boolean isExpired()
+    {
+        if( ( (new Date().getTime() - this.createdDate.getTime() ) / 1000 ) <  TOKEN_EXPIRATION_IN_SECONDS )
+            return false;
+        else
+            return true;
+    }
 
 
 }

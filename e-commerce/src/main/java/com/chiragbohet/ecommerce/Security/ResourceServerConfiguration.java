@@ -53,7 +53,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers("/register/*").anonymous()
                 .antMatchers("/test/*").anonymous() // TODO : Remove this
                 .antMatchers("/admin/*").hasAnyRole("ADMIN")
-                .antMatchers("/customer/*").hasAnyRole("CUSTOMER","ADMIN")
+                .antMatchers("/customer/*").hasAnyRole("CUSTOMER")
                 .antMatchers("/seller/*").hasAnyRole("SELLER")
                 .antMatchers("/doLogout").hasAnyRole("ADMIN", "CUSTOMER", "SELLER")
                 .anyRequest().authenticated()

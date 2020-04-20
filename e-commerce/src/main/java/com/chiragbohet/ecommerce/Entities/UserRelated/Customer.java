@@ -1,5 +1,6 @@
 package com.chiragbohet.ecommerce.Entities.UserRelated;
 
+import com.chiragbohet.ecommerce.Entities.OrderRelated.Order;
 import com.chiragbohet.ecommerce.Security.Role;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,10 @@ public class Customer extends User {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Address> addressSet;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
+    private Set<Order> orderSet;
+
 
     // TODO : Uncomment this
     public Customer()

@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -15,7 +16,8 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "ID")
+    Long id;
 
     @Column(name = "NAME")
     private String name;
@@ -35,9 +37,11 @@ public class Product {
     @Column(name = "IS_ACTIVE")
     boolean isActive;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "SELLER_USER_ID")
-    List<Seller> sellerList;
+    @ManyToMany(mappedBy = "productSet")
+    Set<Seller> sellerSet;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    Set<ProductVariation> productVariationSet;
 
 
     //TODO : Add category field

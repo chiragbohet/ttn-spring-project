@@ -3,16 +3,20 @@ package com.chiragbohet.ecommerce.Services;
 import com.chiragbohet.ecommerce.Dtos.AdminApi.SellerAdminApiDto;
 import com.chiragbohet.ecommerce.Dtos.NewAddressDto;
 import com.chiragbohet.ecommerce.Dtos.PasswordUpdateDto;
+import com.chiragbohet.ecommerce.Dtos.RegistrationApi.EmailDto;
 import com.chiragbohet.ecommerce.Dtos.RegistrationApi.SellerRegistrationDto;
 import com.chiragbohet.ecommerce.Dtos.SellerApi.SellerDetailsDto;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Address;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
+import com.chiragbohet.ecommerce.Entities.UserRelated.User;
 import com.chiragbohet.ecommerce.Exceptions.ConfirmPasswordNotMatchedException;
 import com.chiragbohet.ecommerce.Exceptions.ResourceNotFoundException;
 import com.chiragbohet.ecommerce.Exceptions.UserAlreadyExistsException;
 import com.chiragbohet.ecommerce.Exceptions.UserNotFoundException;
 import com.chiragbohet.ecommerce.Repositories.SellerRepository;
+import com.chiragbohet.ecommerce.Repositories.UserRepository;
+import com.chiragbohet.ecommerce.Utilities.ConfirmationToken;
 import com.chiragbohet.ecommerce.Utilities.EmailSenderService;
 import com.chiragbohet.ecommerce.Utilities.ObjectMapperUtils;
 import org.modelmapper.ModelMapper;
@@ -38,6 +42,9 @@ public class SellerService {
 
     @Autowired
     SellerRepository sellerRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
     EmailSenderService emailSenderService;
@@ -211,4 +218,6 @@ public class SellerService {
         throw new ResourceNotFoundException("No address found with id : " + id + ", associated with your account");
 
     }
+
+
 }

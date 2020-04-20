@@ -1,5 +1,6 @@
 package com.chiragbohet.ecommerce.Entities.UserRelated;
 
+import com.chiragbohet.ecommerce.Entities.ProductRelated.Product;
 import com.chiragbohet.ecommerce.Security.Role;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,7 +29,10 @@ public class Seller extends User {
     @Column(name = "COMPANY_NAME")
     private String companyName;
 
-     //TODO : Uncomment this if not done
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "SELLER_PRODUCT", joinColumns = @JoinColumn(name = "SELLER_ID"), inverseJoinColumns = @JoinColumn(name = "PRODUCT_ID"))
+    Set<Product> productSet;
+
 
     public Seller(){
 

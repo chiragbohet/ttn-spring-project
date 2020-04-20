@@ -7,14 +7,17 @@ import com.chiragbohet.ecommerce.Dtos.CustomerApi.CustomerProfileUpdateDto;
 import com.chiragbohet.ecommerce.Dtos.NewAddressDto;
 import com.chiragbohet.ecommerce.Dtos.PasswordUpdateDto;
 import com.chiragbohet.ecommerce.Dtos.RegistrationApi.CustomerRegistrationDto;
+import com.chiragbohet.ecommerce.Dtos.RegistrationApi.EmailDto;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Address;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
+import com.chiragbohet.ecommerce.Entities.UserRelated.User;
 import com.chiragbohet.ecommerce.Exceptions.ConfirmPasswordNotMatchedException;
 import com.chiragbohet.ecommerce.Exceptions.ResourceNotFoundException;
 import com.chiragbohet.ecommerce.Exceptions.UserAlreadyExistsException;
 import com.chiragbohet.ecommerce.Exceptions.UserNotFoundException;
 import com.chiragbohet.ecommerce.Repositories.ConfirmationTokenRepository;
 import com.chiragbohet.ecommerce.Repositories.CustomerRepository;
+import com.chiragbohet.ecommerce.Repositories.UserRepository;
 import com.chiragbohet.ecommerce.Utilities.ConfirmationToken;
 import com.chiragbohet.ecommerce.Utilities.EmailSenderService;
 import com.chiragbohet.ecommerce.Utilities.ObjectMapperUtils;
@@ -47,6 +50,9 @@ public class CustomerService {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    UserRepository userRepository;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -127,42 +133,34 @@ public class CustomerService {
 
     }
 
-    public ResponseEntity registerNewCustomer(CustomerRegistrationDto customerRegistrationDto) throws UserAlreadyExistsException {
-
-        Customer customer = modelMapper.map(customerRegistrationDto, Customer.class);   // converting DTO to POJO
-
-        if(customerRepository.findByEmail(customer.getEmail()) != null) // User already exists with given email
-            throw new UserAlreadyExistsException("User already exists with email : " + customer.getEmail());
-        else
-            {
-                customerRepository.save(customer);   // persisting the Customer
-
-                ConfirmationToken confirmationToken = new ConfirmationToken(customer);
-                confirmationTokenRepository.save(confirmationToken);
-
-                emailSenderService.sendEmail(emailSenderService.getCustomerAwaitingActivationMail(customer.getEmail(), confirmationToken.getConfirmationToken()));
-                return ResponseEntity.status(HttpStatus.CREATED).build();
-             }
 
 
-
-    }
-
-    public String validateRegistrationToken(String userToken){
+    public ResponseEntity validateRegistrationToken(String userToken){
 
         ConfirmationToken foundToken = confirmationTokenRepository.findByConfirmationToken(userToken);
 
         // TODO : add token expiration mechanism
         if(foundToken != null)
         {
-            Customer customer = customerRepository.findByEmail(foundToken.getUser().getEmail());
-            customer.setEnabled(true);
-            customerRepository.save(customer);
-            confirmationTokenRepository.delete(foundToken);
-            return "account verified";
+            if(foundToken.isExpired())
+            {
+                createCustomerActivationTokenAndSendEmail((Customer) foundToken.getUser());
+                return new ResponseEntity<String> ("This token is expired, please check your email for a new token!", null, HttpStatus.OK);
+            }
+            else
+                {
+                    Customer customer = customerRepository.findByEmail(foundToken.getUser().getEmail());
+                    customer.setActive(true);
+                    customer.setEnabled(true);
+                    customerRepository.save(customer);
+                    confirmationTokenRepository.delete(foundToken);
+                    return new ResponseEntity<String> ("Account Verified", null, HttpStatus.OK);
+                }
+
+
         }
 
-        return "Invalid token!";
+        return new ResponseEntity<String> ("Invalid token!", null, HttpStatus.UNAUTHORIZED);
     }
 
     public ResponseEntity updateCustomerDetails(String email, CustomerProfileUpdateDto customerProfileUpdateDto) {
@@ -266,4 +264,98 @@ public class CustomerService {
 
 
     }
+
+    public ResponseEntity registerNewCustomer(CustomerRegistrationDto customerRegistrationDto) throws UserAlreadyExistsException {
+
+        Customer customer = modelMapper.map(customerRegistrationDto, Customer.class);   // converting DTO to POJO
+
+        if(customerRepository.findByEmail(customer.getEmail()) != null) // User already exists with given email
+            throw new UserAlreadyExistsException("User already exists with email : " + customer.getEmail());
+        else
+        {
+            customerRepository.save(customer);   // persisting the Customer
+
+            createCustomerActivationTokenAndSendEmail(customer);
+
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+
+
+
+    }
+
+    public void createCustomerActivationTokenAndSendEmail(Customer customer)
+    {
+        ConfirmationToken confirmationToken = new ConfirmationToken(customer);
+        confirmationTokenRepository.save(confirmationToken);
+
+        emailSenderService.sendEmail(emailSenderService.getCustomerAwaitingActivationMail(customer.getEmail(), confirmationToken.getConfirmationToken()));
+    }
+
+    public ResponseEntity resendActivationLink(EmailDto emailDto) {
+
+        Customer customer = customerRepository.findByEmail(emailDto.getEmail());
+
+        if(customer == null)
+            throw new UserNotFoundException("No user found with associated with the given email!. Kindly register yourself first.");
+        else if(customer.isActive())
+            return new ResponseEntity<String>("Your account is already active!",null,HttpStatus.CONFLICT);
+        else
+            {
+                confirmationTokenRepository.delete(confirmationTokenRepository.findByUser(customer));
+
+                createCustomerActivationTokenAndSendEmail(customer);
+                return new ResponseEntity<String>("Please check your email for new registration link!",null,HttpStatus.OK);
+            }
+
+    }
+
+    public ResponseEntity forgotPassword(EmailDto emailDto) {
+
+        User user =  userRepository.findByEmail(emailDto.getEmail());
+
+        if(user == null)
+            throw new UserNotFoundException("No user found with associated with the given email!. Kindly register yourself first.");
+        else if(!user.isActive())
+            return new ResponseEntity<String>("Your account is not active please activate it first. For more help contact admin.",null,HttpStatus.FORBIDDEN);
+        else
+        {
+            ConfirmationToken confirmationToken = new ConfirmationToken(user);
+            confirmationTokenRepository.save(confirmationToken);
+
+          emailSenderService.sendEmail(emailSenderService.getUserForgotPasswordEmail(user.getEmail(), confirmationToken.getConfirmationToken()));
+            
+            return new ResponseEntity<String>("Please check your email for further instructions.",null,HttpStatus.OK);
+
+        }
+
+    }
+
+    public ResponseEntity validateForgotPasswordRequestAndResetPassword(String token, PasswordUpdateDto passwordUpdateDto) {
+
+        if(!passwordUpdateDto.getPassword().equals(passwordUpdateDto.getConfirmPassword()))
+            throw new ConfirmPasswordNotMatchedException("Password and confirm password do not match");
+
+        ConfirmationToken confirmationToken = confirmationTokenRepository.findByConfirmationToken(token);
+
+        if(confirmationToken.isExpired())
+        {
+            return new ResponseEntity<String>("Password reset link is expired, please generate a new one!",null,HttpStatus.UNAUTHORIZED);
+        }
+        else
+            {
+                User user = confirmationToken.getUser();
+
+                user.setPassword(passwordEncoder.encode(passwordUpdateDto.getPassword()));
+
+                userRepository.save(user);
+
+                return new ResponseEntity<String>("Password updated!",null,HttpStatus.OK);
+            }
+
+
+
+
+    }
+
 }

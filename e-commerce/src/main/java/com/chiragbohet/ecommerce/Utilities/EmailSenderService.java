@@ -100,5 +100,18 @@ public class EmailSenderService {
         return mailMessage;
     }
 
+    public SimpleMailMessage getUserForgotPasswordEmail(String userEmail, String confirmationToken)
+    {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(userEmail);
+        mailMessage.setSubject("Forgot password?");
+        mailMessage.setFrom(senderEmail);
+        mailMessage.setText("Dear user, to reset your password use this link : "
+                +"http://localhost:8080/register/forgot-password?token="+confirmationToken);
+
+        return mailMessage;
+    }
+
+
 
 }
