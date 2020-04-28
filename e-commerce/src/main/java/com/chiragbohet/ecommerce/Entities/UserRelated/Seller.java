@@ -21,7 +21,7 @@ public class Seller extends User {
 
     //TODO :  add validation using REGEX
     @Column(name = "GST")
-    private String Gst;
+    private String gst;
 
     @Column(name = "COMPANY_CONTACT")
     private String companyContact;

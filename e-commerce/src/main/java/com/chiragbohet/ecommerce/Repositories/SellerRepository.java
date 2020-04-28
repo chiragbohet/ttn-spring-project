@@ -7,4 +7,5 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
 
     Seller findByEmail(String email);
     Seller findByCompanyNameIgnoreCase(String companyName);
+    Seller findByGst(String gst);
 }

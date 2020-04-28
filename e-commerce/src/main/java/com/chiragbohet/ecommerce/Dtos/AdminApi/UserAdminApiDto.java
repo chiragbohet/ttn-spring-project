@@ -10,6 +10,7 @@ public class UserAdminApiDto {
     Long id;
     String firstName;
     String lastName;
+    String email;
     boolean isActive;
 
 }

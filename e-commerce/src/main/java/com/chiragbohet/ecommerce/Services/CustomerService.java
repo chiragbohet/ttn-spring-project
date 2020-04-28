@@ -77,7 +77,7 @@ public class CustomerService {
     }
 
     public ResponseEntity activateCustomer(Long id){
-
+        //TODO : Delete customer activation token
         Optional<Customer> customer = customerRepository.findById(id);
 
         if(customer.isPresent())
@@ -271,13 +271,17 @@ public class CustomerService {
 
         if(customerRepository.findByEmail(customer.getEmail()) != null) // User already exists with given email
             throw new UserAlreadyExistsException("User already exists with email : " + customer.getEmail());
+        else if(!customerRegistrationDto.getPassword().equals(customerRegistrationDto.getConfirmPassword()))
+            throw new ConfirmPasswordNotMatchedException("Password and Confirm password don't match!");
         else
         {
+            String encyptedPassword = passwordEncoder.encode(customer.getPassword());
+            customer.setPassword(encyptedPassword);
             customerRepository.save(customer);   // persisting the Customer
 
             createCustomerActivationTokenAndSendEmail(customer);
 
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            return new ResponseEntity<String>("Please check your email for further instructions.",null,HttpStatus.CREATED);
         }
 
 

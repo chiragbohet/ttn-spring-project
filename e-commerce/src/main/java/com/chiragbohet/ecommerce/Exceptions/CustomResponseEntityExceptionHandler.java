@@ -65,6 +65,19 @@ public class CustomResponseEntityExceptionHandler
         return new ResponseEntity(exceptionResponseFormat, HttpStatus.CONFLICT);
     }
 
+    // UserAlreadyExistsException exception handler
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public final ResponseEntity<Object> handleResourceAlreadyExistsException(Exception ex, WebRequest request) throws Exception {
+        ExceptionResponseFormat exceptionResponseFormat =
+                new ExceptionResponseFormat(new Date(),
+                        ex.getMessage(),
+                        request.getDescription(false));
+
+        // ref : https://stackoverflow.com/questions/3825990/http-response-code-for-post-when-resource-already-exists
+        return new ResponseEntity(exceptionResponseFormat, HttpStatus.CONFLICT);
+    }
+
+
     // For validation related exceptions
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(

@@ -6,6 +6,7 @@ import com.chiragbohet.ecommerce.Dtos.PasswordUpdateDto;
 import com.chiragbohet.ecommerce.Dtos.RegistrationApi.EmailDto;
 import com.chiragbohet.ecommerce.Dtos.RegistrationApi.SellerRegistrationDto;
 import com.chiragbohet.ecommerce.Dtos.SellerApi.SellerDetailsDto;
+import com.chiragbohet.ecommerce.Dtos.SellerApi.SellerProfileUpdateDto;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Address;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
@@ -117,15 +118,19 @@ public class SellerService {
 
         Seller seller = modelMapper.map(sellerRegistrationDto, Seller.class);
 
-        if(sellerRepository.findByEmail(seller.getEmail()) != null)
+        if(userRepository.findByEmail(seller.getEmail()) != null)   // TODO : For now customer and seller cannot have same email id
             throw new UserAlreadyExistsException("User already exists with email : " + seller.getEmail());
+        else if(sellerRepository.findByGst(sellerRegistrationDto.getGst()) != null)
+            throw new UserAlreadyExistsException("A seller already exists with the given GST number : " + seller.getGst());
         else if(sellerRepository.findByCompanyNameIgnoreCase(seller.getCompanyName()) != null)
             throw new UserAlreadyExistsException("Company already exists with the given name : " + seller.getCompanyName());
         else
             {
+                String encyptedPassword = passwordEncoder.encode(seller.getPassword());
+                seller.setPassword(encyptedPassword);
                 sellerRepository.save(seller);
-                emailSenderService.sendEmail(emailSenderService.getSellerActivationMail(seller.getEmail()));
-                return ResponseEntity.status(HttpStatus.CREATED).build();
+                emailSenderService.sendEmail(emailSenderService.getSellerAwaitingActivationMail(seller.getEmail()));
+                return new ResponseEntity<String>("Please check your email for further instructions.",null,HttpStatus.CREATED);
             }
     }
 
@@ -139,13 +144,13 @@ public class SellerService {
 
     }
 
-    public ResponseEntity updateSellerDetails(String email, SellerDetailsDto sellerDetailsDto) {
+    public ResponseEntity updateSellerDetails(String email, SellerProfileUpdateDto sellerDetailsDto) {
 
         Seller seller = sellerRepository.findByEmail(email);
 
-        if(sellerRepository.findByEmail(sellerDetailsDto.getEmail()) != null)
-            throw new UserAlreadyExistsException("User already exists with email : " + seller.getEmail());
-        else if(sellerRepository.findByCompanyNameIgnoreCase(sellerDetailsDto.getCompanyName()) != null)
+//        if(userRepository.findByEmail(sellerDetailsDto.getEmail()) != null) // TODO : for now customer and seller cannot have same email id
+//            throw new UserAlreadyExistsException("User already exists with email : " + seller.getEmail());
+        if(sellerRepository.findByCompanyNameIgnoreCase(sellerDetailsDto.getCompanyName()) != null)
             throw new UserAlreadyExistsException("Company already exists with the given name : " + seller.getCompanyName());
         else
         {
@@ -159,8 +164,8 @@ public class SellerService {
                 seller.setCompanyName(sellerDetailsDto.getCompanyName());
             if(sellerDetailsDto.getCompanyContact() != null)
                 seller.setCompanyContact(sellerDetailsDto.getCompanyContact());
-            if(sellerDetailsDto.getEmail() != null)
-                seller.setEmail(sellerDetailsDto.getEmail());
+//            if(sellerDetailsDto.getEmail() != null)
+//                seller.setEmail(sellerDetailsDto.getEmail());
 
             sellerRepository.save(seller);
 

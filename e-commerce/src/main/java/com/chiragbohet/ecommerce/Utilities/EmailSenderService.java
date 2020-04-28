@@ -32,7 +32,7 @@ public class EmailSenderService {
         mailMessage.setTo(customerEmail);
         mailMessage.setSubject("Complete Registration!");
         mailMessage.setFrom(senderEmail);
-        mailMessage.setText("To confirm your account, please click here : "
+        mailMessage.setText("To complete your account registration, please click here : "
                 +"http://localhost:8080/register/confirm?token="+confirmationToken);
 
         return mailMessage;
@@ -94,7 +94,7 @@ public class EmailSenderService {
     {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(email);
-        mailMessage.setSubject("Registration completed");
+        mailMessage.setSubject("Awaiting approval");
         mailMessage.setFrom(senderEmail);
         mailMessage.setText("Dear seller your account has been created and is waiting for an approval.");
         return mailMessage;

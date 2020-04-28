@@ -16,9 +16,7 @@ public class CategoryMetadataField {
     @Column(name = "ID")
     Long id;
 
-    @Column(name = "NAME")
+    @Column(name = "NAME", unique = true, nullable = false)
     String name;
-
-
 
 }

@@ -1,6 +1,17 @@
 package com.chiragbohet.ecommerce.Utilities;
 
+import com.chiragbohet.ecommerce.Repositories.RoleRepository;
+import com.chiragbohet.ecommerce.Security.Role;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
 public class GlobalVariables {
+
+    @Autowired
+    RoleRepository roleRepository;
 
 
     public static final String DEFAULT_PAGE_SIZE = "10";
@@ -9,12 +20,13 @@ public class GlobalVariables {
     public static final String DEFAULT_SORT_DIRECTION = "asc";
 
 
+
     // Regular expressions
 
     // for conversion to java compatible regex : https://stackoverflow.com/questions/2945783/easy-way-to-convert-regex-to-a-java-compatible-regex
 
     // ref : http://regexlib.com/REDetails.aspx?regexp_id=1111
-    public static final String REGEX_PASSWORD = "(?=^.{6,10}$)(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&amp;*()_+}{&quot;:;'?/&gt;.&lt;,])(?!.*\\s).*$";
+    public static final String REGEX_PASSWORD = "(?=^.{8,15}$)(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&amp;*()_+}{&quot;:;'?/&gt;.&lt;,])(?!.*\\s).*$";
 
     // ref : https://stackoverflow.com/questions/3813195/regular-expression-for-indian-mobile-numbers
     public static final String REGEX_MOBILE_NUMBER = "^[789]\\d{9}$";
@@ -27,4 +39,9 @@ public class GlobalVariables {
 
     public static final String MESSAGE_PASSWORD_VALIDATION = "Please enter a valid password! 8-15 characters with atleast 1 lowercase, 1 uppercase, 1 special character, 1 number.";
 
+
+    @Bean
+    public ModelMapper modelMapper(){
+        return new ModelMapper();
+    }
 }

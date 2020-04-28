@@ -77,9 +77,9 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
                 .withClient("live-test")
                 .secret(passwordEncoder.encode("abcde"))
                 .authorizedGrantTypes("password","refresh_token")
-                .refreshTokenValiditySeconds(30 * 24 * 3600)
+                .refreshTokenValiditySeconds(24*60*60)
                 .scopes("app")
-                .accessTokenValiditySeconds(7*24*60);
+                .accessTokenValiditySeconds(24*60);
     }
 
     @Override

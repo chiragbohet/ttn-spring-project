@@ -35,6 +35,7 @@ public class Bootstrap implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         if(userRepository.count()<1){
 
+            addRoles();
             addTestSeller();
             addTestCustomer();
             addTestAdmin();
@@ -42,6 +43,18 @@ public class Bootstrap implements ApplicationRunner {
             System.out.println("Total users saved::"+userRepository.count());
 
         }
+    }
+
+    void addRoles()
+    {
+        Role ROLE_SELLER = new Role("ROLE_SELLER");
+        Role ROLE_ADMIN = new Role("ROLE_SELLER");
+        Role ROLE_CUSTOMER = new Role("ROLE_SELLER");
+
+        roleRepository.save(ROLE_SELLER);
+        roleRepository.save(ROLE_ADMIN);
+        roleRepository.save(ROLE_ADMIN);
+
     }
 
     void addTestSeller()
@@ -52,7 +65,7 @@ public class Bootstrap implements ApplicationRunner {
         seller.setFirstName("Test");
         seller.setMiddleName("Seller");
         seller.setEmail("testseller@localhost.com");
-        seller.setPassword(passwordEncoder.encode("pass"));
+        seller.setPassword(passwordEncoder.encode("1A2a$5AA"));
 
         //seller specific fields
         Address address = new Address();
@@ -66,7 +79,7 @@ public class Bootstrap implements ApplicationRunner {
         seller.setCompanyContact("9999999999");
         seller.setCompanyName("To The New");
         seller.setAddress(address);
-        //address.setUser(seller); TODO : Fix this infinite loop
+        address.setUser(seller);// TODO : Fix this infinite loop
         seller.setGst("18AABCT3518Q1ZV");
 
 
@@ -89,7 +102,7 @@ public class Bootstrap implements ApplicationRunner {
         customer.setFirstName("Test");
         customer.setMiddleName("Customer");
         customer.setEmail("testcustomer@localhost.com");
-        customer.setPassword(passwordEncoder.encode("pass"));
+        customer.setPassword(passwordEncoder.encode("1A2a$5AA"));
         customer.setContact("9999999999");
 
         customer.setActive(false);  // will be activated via email
@@ -133,7 +146,7 @@ public class Bootstrap implements ApplicationRunner {
         admin.setFirstName("Test");
         admin.setMiddleName("Admin");
         admin.setEmail("testadmin@localhost.com");
-        admin.setPassword(passwordEncoder.encode("pass"));
+        admin.setPassword(passwordEncoder.encode("1A2a$5AA"));
         admin.setContact("9999999999");
 
         admin.setActive(true);  // will be activated via email

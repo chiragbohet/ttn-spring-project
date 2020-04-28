@@ -3,6 +3,7 @@ package com.chiragbohet.ecommerce.Controllers;
 import com.chiragbohet.ecommerce.Dtos.NewAddressDto;
 import com.chiragbohet.ecommerce.Dtos.PasswordUpdateDto;
 import com.chiragbohet.ecommerce.Dtos.SellerApi.SellerDetailsDto;
+import com.chiragbohet.ecommerce.Dtos.SellerApi.SellerProfileUpdateDto;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
 import com.chiragbohet.ecommerce.Services.SellerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,8 @@ public class SellerController {
     }
 
     @PatchMapping("/seller")
-    ResponseEntity updateSellerDetails(Principal principal, @Valid @RequestBody SellerDetailsDto sellerDetailsDto){
-        return sellerService.updateSellerDetails(principal.getName(), sellerDetailsDto);
+    ResponseEntity updateSellerDetails(Principal principal, @Valid @RequestBody SellerProfileUpdateDto sellerProfileUpdateDto){
+        return sellerService.updateSellerDetails(principal.getName(), sellerProfileUpdateDto);
     }
 
     @PatchMapping("/seller/update-password")

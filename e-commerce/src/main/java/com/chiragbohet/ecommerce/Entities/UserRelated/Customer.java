@@ -60,8 +60,8 @@ public class Customer extends User {
             {
                 if(!addressSet.contains(address))
                 {
-                    addressSet.add(address);
                     address.setUser(this);
+                    addressSet.add(address);
                 }
             }
 
