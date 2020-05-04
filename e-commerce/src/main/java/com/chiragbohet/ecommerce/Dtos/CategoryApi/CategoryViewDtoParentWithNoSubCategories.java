@@ -3,6 +3,8 @@ package com.chiragbohet.ecommerce.Dtos.CategoryApi;
 import lombok.Getter;
 import lombok.Setter;
 
+// DTO class with no references to subcategories to prevent infinite reference problem
+
 @Getter
 @Setter
 public class CategoryViewDtoParentWithNoSubCategories {

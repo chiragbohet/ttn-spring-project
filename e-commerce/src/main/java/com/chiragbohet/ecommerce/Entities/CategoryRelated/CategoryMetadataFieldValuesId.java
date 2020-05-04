@@ -1,14 +1,23 @@
 package com.chiragbohet.ecommerce.Entities.CategoryRelated;
 
-import lombok.Data;
+import lombok.*;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import java.io.Serializable;
 
-// ref : https://www.baeldung.com/jpa-composite-primary-keys
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+@Embeddable
 public class CategoryMetadataFieldValuesId implements Serializable {
 
-    Long categoryMetadataFieldId;
-    Long categoryId;
+    @Column(name = "CATEGORY_METADATA_FIELD_ID")
+    private Long categoryMetadataFieldId;
+
+    @Column(name = "CATEGORY_ID")
+    private Long categoryId;
 
 }

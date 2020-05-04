@@ -1,12 +1,14 @@
 package com.chiragbohet.ecommerce.Security;
 
+import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
+import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataField;
+import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValues;
+import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValuesId;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Address;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
-import com.chiragbohet.ecommerce.Repositories.RoleRepository;
-import com.chiragbohet.ecommerce.Repositories.SellerRepository;
-import com.chiragbohet.ecommerce.Repositories.UserRepository;
+import com.chiragbohet.ecommerce.Repositories.*;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
-import com.chiragbohet.ecommerce.Repositories.CustomerRepository;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -14,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+@Log4j2
 @Component
 public class Bootstrap implements ApplicationRunner {
 
@@ -29,6 +32,15 @@ public class Bootstrap implements ApplicationRunner {
     @Autowired
     RoleRepository roleRepository;
 
+    @Autowired
+    CategoryRepository categoryRepository;
+
+    @Autowired
+    CategoryMetadataFieldRepository categoryMetadataFieldRepository;
+
+    @Autowired
+    CategoryMetadataFieldValuesRepository categoryMetadataFieldValuesRepository;
+
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
@@ -39,10 +51,76 @@ public class Bootstrap implements ApplicationRunner {
             addTestSeller();
             addTestCustomer();
             addTestAdmin();
+            addMetadataFields();
+            addDummyCategories();
 
-            System.out.println("Total users saved::"+userRepository.count());
+            log.info("Total users saved::"+userRepository.count());
 
         }
+    }
+
+    void addDummyCategories()
+    {
+        log.info("Adding dummy categories...");
+        Category A = new Category();
+        A.setName("A");
+        A.setParentCategory(null);
+        categoryRepository.save(A);
+
+        Category B = new Category();
+        B.setName("B");
+        B.setParentCategory(A);
+        categoryRepository.save(B);
+
+        Category C = new Category();
+        C.setName("C");
+        C.setParentCategory(B);
+        categoryRepository.save(C);
+
+        Category D = new Category();
+        D.setName("D");
+        D.setParentCategory(C);
+        categoryRepository.save(D);
+
+        Category E = new Category();
+        E.setName("D");
+        E.setParentCategory(D);
+        categoryRepository.save(E);
+
+        log.info("Finished adding dummy categories...");
+    }
+
+
+    void addMetadataFields()
+    {
+        Category category = new Category();
+        category.setParentCategory(null);
+        category.setName("Mobile Phones");
+        categoryRepository.save(category);
+
+
+        CategoryMetadataField field = new CategoryMetadataField();
+        field.setName("Megapixels");
+        categoryMetadataFieldRepository.save(field);
+
+
+        CategoryMetadataFieldValues values = new CategoryMetadataFieldValues();
+        values.setValues("4mp,8mp,10mp,12p,14mp,18mp");
+
+
+        Category c = categoryRepository.findById(category.getId()).get();
+        CategoryMetadataField cm = categoryMetadataFieldRepository.findById(field.getId()).get();
+
+        c.addFieldValues(values);
+        cm.addFieldValues(values);
+
+        //categoryRepository.save(c);
+        //categoryMetadataFieldRepository.save(cm);
+
+        //persisting
+        categoryMetadataFieldValuesRepository.save(values);
+
+
     }
 
     void addRoles()

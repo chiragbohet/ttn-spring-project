@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,15 +25,30 @@ public class Category {
     @Column(name = "NAME")
     String name;
 
+    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    Set<Category> subCategoriesSet;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    Set<CategoryMetadataFieldValues> fieldValuesSet;
+
     @ManyToOne
     @JoinColumn(name = "PARENT_ID")
     Category parentCategory;
 
-    @OneToMany
-    Set<Category> subCategoriesSet;
+    public void addFieldValues(CategoryMetadataFieldValues... values)
+    {
+        if(values != null)
+        {
+            if(fieldValuesSet == null)
+                fieldValuesSet = new HashSet<>();
 
-    @OneToMany
-    Set<CategoryMetadataField> categoryMetadataFieldSet;
+            for (CategoryMetadataFieldValues value : values)
+            {
+                value.setCategory(this);
+                fieldValuesSet.add(value);
+            }
+        }
+    }
 
     public void addSubCategory(Category... categories)
     {
@@ -50,18 +66,5 @@ public class Category {
         }
     }
 
-    public void addCategoryMetadataField(CategoryMetadataField... fields)
-    {
-        if(fields != null)
-        {
-            if(categoryMetadataFieldSet == null)
-                categoryMetadataFieldSet = new HashSet<>();
-
-            for(CategoryMetadataField field : fields)
-            {
-                categoryMetadataFieldSet.add(field);
-            }
-        }
-    }
 
 }

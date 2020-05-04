@@ -20,7 +20,6 @@ public class GlobalVariables {
     public static final String DEFAULT_SORT_DIRECTION = "asc";
 
 
-
     // Regular expressions
 
     // for conversion to java compatible regex : https://stackoverflow.com/questions/2945783/easy-way-to-convert-regex-to-a-java-compatible-regex
@@ -44,4 +43,5 @@ public class GlobalVariables {
     public ModelMapper modelMapper(){
         return new ModelMapper();
     }
+
 }

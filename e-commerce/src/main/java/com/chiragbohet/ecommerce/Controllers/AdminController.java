@@ -40,7 +40,6 @@ public class AdminController {
 
     }
 
-
     @PatchMapping("admin/customer/activate/{id}")
     ResponseEntity activateCustomer(@PathVariable Long id) {
         return customerService.activateCustomer(id);
@@ -60,6 +59,5 @@ public class AdminController {
     ResponseEntity deactivateSeller(@PathVariable Long id) {
         return sellerService.deactivateSeller(id);
     }
-
 
 }

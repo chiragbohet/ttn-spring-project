@@ -1,28 +1,36 @@
 package com.chiragbohet.ecommerce.Entities.CategoryRelated;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.FieldDefaults;
-
 import javax.persistence.*;
+
 
 @Getter
 @Setter
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@IdClass(CategoryMetadataFieldValuesId.class)
+@Table(name = "CATEGORY_METADATA_FIELD_VALUES")
+//@IdClass(CategoryMetadataFieldValuesId.class)
 public class CategoryMetadataFieldValues {
 
-    @Id
-    @Column(name = "CATEGORY_METADATA_FIELD_ID")
-    Long categoryMetadataFieldId;
+    @EmbeddedId
+    CategoryMetadataFieldValuesId id = new CategoryMetadataFieldValuesId();
 
-    @Id
-    @Column(name = "CATEGORY_ID")
-    Long categoryId;
+//    @Id
+//    private Long categoryMetadataFieldId;
+//
+//    @Id
+//    private Long categoryId;
 
-    @Column(name = "VALUES")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @MapsId("categoryMetadataFieldId")
+    private CategoryMetadataField categoryMetadataField;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @MapsId("categoryId")
+    private Category category;
+
+    @Column(name = "METADATA_VALUES")
     String values;
+
 
 }
