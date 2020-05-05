@@ -7,8 +7,11 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
-public class CategoryMetadataFieldCo {
+public class CategoryUpdateCo {
 
-    @NotNull(message = "Name cannot be null!")
+    @NotNull
+    Long id;
+
+    @NotNull
     String name;
 }

@@ -31,6 +31,16 @@ public class CustomResponseEntityExceptionHandler
         return new ResponseEntity(exceptionResponseFormat, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(GenericUserValidationFailedException.class)
+    public final ResponseEntity<Object> handleAllGenericUserValidationException(Exception ex, WebRequest request) throws Exception {
+        ExceptionResponseFormat exceptionResponseFormat =
+                new ExceptionResponseFormat(new Date(),
+                        ex.getMessage(),
+                        request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponseFormat, HttpStatus.BAD_REQUEST);
+    }
+
     // UserNotFoundException exception handler
     @ExceptionHandler(UserNotFoundException.class)
     public final ResponseEntity<Object> handleUserNotFoundException(Exception ex, WebRequest request) throws Exception {

@@ -1,18 +1,22 @@
 package com.chiragbohet.ecommerce.Services;
 
-import com.chiragbohet.ecommerce.Dtos.CategoryApi.CategoryMetadataFieldValuesDto;
+import com.chiragbohet.ecommerce.co.CategoryUpdateCo;
 import com.chiragbohet.ecommerce.Dtos.CategoryApi.CategoryViewDto;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataField;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValues;
-import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
+import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValuesId;
+import com.chiragbohet.ecommerce.Exceptions.GenericUserValidationFailedException;
 import com.chiragbohet.ecommerce.Exceptions.ResourceAlreadyExistsException;
 import com.chiragbohet.ecommerce.Exceptions.ResourceNotFoundException;
 import com.chiragbohet.ecommerce.Repositories.CategoryMetadataFieldRepository;
 import com.chiragbohet.ecommerce.Repositories.CategoryMetadataFieldValuesRepository;
 import com.chiragbohet.ecommerce.Repositories.CategoryRepository;
+import com.chiragbohet.ecommerce.Utilities.ObjectMapperUtils;
 import com.chiragbohet.ecommerce.co.CategoryCo;
 import com.chiragbohet.ecommerce.co.CategoryMetadataFieldCo;
+import com.chiragbohet.ecommerce.co.CategoryMetadataFieldValuesCo;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,11 +27,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+@Log4j2
 @Service
 public class CategoryService {
 
@@ -61,6 +63,8 @@ public class CategoryService {
         if(categoryRepository.findByName(co.getName()) != null)
             throw new ResourceAlreadyExistsException("A category already exists with name : " + co.getName());
 
+        //TODO : Check uniqueness at rootlevel and at subtree
+
         Category newCategory = new Category();
         newCategory.setName(co.getName());
 
@@ -83,6 +87,24 @@ public class CategoryService {
         return new ResponseEntity<Long>(newCategory.getId(),null,HttpStatus.CREATED);
     }
 
+    public ResponseEntity updateCategory(CategoryUpdateCo co) {
+
+        Optional<Category> category = categoryRepository.findById(co.getId());
+
+        if(!category.isPresent())
+            throw new ResourceNotFoundException("No category found with ID : " + co.getId());
+
+        //TODO : Check name uniqueness
+
+        // setting new name
+        category.get().setName(co.getName());
+
+        //persisting
+        categoryRepository.save(category.get());
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @Secured("ROLE_ADMIN")
     public ResponseEntity getCategory(Long id) {
 
@@ -92,36 +114,18 @@ public class CategoryService {
             throw new ResourceNotFoundException("No category with id : " + id + " found.");
 
         CategoryViewDto dto = modelMapper.map(category.get(), CategoryViewDto.class);
-        //dto.setMetadataFieldValuesDto(getPopulatedCategoryMetadataFieldValuesDtoList(category.get().getId()));
 
         return new ResponseEntity<CategoryViewDto>(dto,null, HttpStatus.OK);
-
     }
 
-//    List<CategoryMetadataFieldValuesDto> getPopulatedCategoryMetadataFieldValuesDtoList(Long categoryId) {
-//
-//        Set<CategoryMetadataFieldValues> valuesSet = categoryMetadataFieldValuesRepository.findAllByCategoryId(categoryId);
-//
-//        List<CategoryMetadataFieldValuesDto> dtoList = new ArrayList<>();
-//
-//        for(CategoryMetadataFieldValues value : valuesSet)
-//        {
-//           CategoryMetadataFieldValuesDto dto = new CategoryMetadataFieldValuesDto();
-//
-//           dto.setCategoryMetadataFieldId(value.getCategoryMetadataFieldId());
-//           dto.setCategoryMetadataFieldName(categoryMetadataFieldRepository.findById(value.getCategoryMetadataFieldId()).get().getName());
-//           //dto.set
-//        }
-//
-//
-//
-//    }
+    public ResponseEntity getAllCategories(Optional<Integer> page, Optional<Integer> size, Optional<String> sortProperty, Optional<String> sortDirection) {
 
-    @Secured("ROLE_ADMIN")
-    public ResponseEntity getAllCategories() {
-     return new ResponseEntity(HttpStatus.OK);
+        List<Category> categoryList = categoryRepository.findAll();
+        List<CategoryViewDto> dtoList = ObjectMapperUtils.mapAllList(categoryList, CategoryViewDto.class);
+
+        return new ResponseEntity<List<CategoryViewDto>>(dtoList, null, HttpStatus.OK);
+
     }
-
 
     public ResponseEntity getAllMetadataFields(Optional<Integer> page, Optional<Integer> size, Optional<String> sortProperty, Optional<String> sortDirection) {
 
@@ -133,5 +137,122 @@ public class CategoryService {
 
     }
 
+    public ResponseEntity addNewMetadataFieldValues(CategoryMetadataFieldValuesCo co) {
 
+        Optional<Category> category = categoryRepository.findById(co.getCategoryId());
+        Optional<CategoryMetadataField> field = categoryMetadataFieldRepository.findById(co.getMetadataFieldId());
+
+        if(!category.isPresent())
+            throw new ResourceNotFoundException("No Category found with ID : " + co.getCategoryId());
+        if(!field.isPresent())
+            throw new ResourceNotFoundException("No CategoryMetadataField found with ID : " + co.getCategoryId());
+        //check if the category is a leaf category
+        if(category.get().getSubCategoriesSet() != null)
+            throw new GenericUserValidationFailedException("The category is not a leaf category, please enter ID of a valid leaf category.");
+
+        // checking if all the values are unique
+        String[] fieldValues = co.getValues().split(",");
+        Set<String> fieldValuesSet = new HashSet<String>(Arrays.asList(fieldValues));
+
+        if(fieldValues.length != fieldValuesSet.size())
+            throw new GenericUserValidationFailedException("Values should be Unique!");
+
+        // checking if a value already exists for given combination of Category and CategoryMetadataField
+        CategoryMetadataFieldValuesId id = new CategoryMetadataFieldValuesId();
+        id.setCategoryId(category.get().getId());
+        id.setCategoryMetadataFieldId(field.get().getId());
+
+        if(categoryMetadataFieldValuesRepository.findById(id).isPresent())
+            throw new ResourceAlreadyExistsException("Value already exists for given combination of Category and CategoryMetadataField, if you want to update an existing value use a PUT instead.");
+
+        // if all checks passed, persisting the values
+        CategoryMetadataFieldValues values = new CategoryMetadataFieldValues();
+
+        values.setCategory(category.get());
+        values.setCategoryMetadataField(field.get());
+        values.setValues(co.getValues());
+
+        categoryMetadataFieldValuesRepository.save(values);
+
+        return new ResponseEntity(HttpStatus.CREATED);
+    }
+
+    public ResponseEntity updateMetadataFieldValues(CategoryMetadataFieldValuesCo co) {
+
+        Optional<Category> category = categoryRepository.findById(co.getCategoryId());
+        Optional<CategoryMetadataField> field = categoryMetadataFieldRepository.findById(co.getMetadataFieldId());
+
+        if(!category.isPresent())
+            throw new ResourceNotFoundException("No Category found with ID : " + co.getCategoryId());
+        if(!field.isPresent())
+            throw new ResourceNotFoundException("No CategoryMetadataField found with ID : " + co.getCategoryId());
+        //check if the category is a leaf category
+        if(category.get().getSubCategoriesSet() != null)
+            throw new GenericUserValidationFailedException("The category is not a leaf category, please enter ID of a valid leaf category.");
+
+        // checking if all the values are unique
+        String[] fieldValues = co.getValues().split(",");
+        Set<String> fieldValuesSet = new HashSet<String>(Arrays.asList(fieldValues));
+
+        if(fieldValues.length != fieldValuesSet.size())
+            throw new GenericUserValidationFailedException("Values should be Unique!");
+
+        // checking if a value already exists for given combination of Category and CategoryMetadataField
+        CategoryMetadataFieldValuesId id = new CategoryMetadataFieldValuesId();
+        id.setCategoryId(category.get().getId());
+        id.setCategoryMetadataFieldId(field.get().getId());
+
+        Optional<CategoryMetadataFieldValues> values = categoryMetadataFieldValuesRepository.findById(id);
+
+        if(!values.isPresent())
+            throw new ResourceNotFoundException("No values found for given combination of Category and CategoryMetadataField!");
+
+
+        //adding new field values
+        List<String> oldFieldValues = Arrays.asList(values.get().getValues().split(","));
+        List<String> newFieldValues = Arrays.asList(co.getValues().split(","));
+
+        Set<String> uniqueFieldValuesSet = new HashSet<>();
+        uniqueFieldValuesSet.addAll(oldFieldValues);
+        uniqueFieldValuesSet.addAll(newFieldValues);
+
+        String uniqueFieldValues = String.join(",",uniqueFieldValuesSet);
+
+        values.get().setValues(uniqueFieldValues);
+
+        // persisting
+        categoryMetadataFieldValuesRepository.save(values.get());
+
+        return new ResponseEntity(HttpStatus.OK);
+
+    }
+
+    public ResponseEntity getAllCategoriesForSeller() {
+
+        List<Category> leafCategories = categoryRepository.getAllLeafCategories();
+        List<CategoryViewDto> dtoList = ObjectMapperUtils.mapAllList(leafCategories, CategoryViewDto.class);
+        return new ResponseEntity<List<CategoryViewDto>>(dtoList, null, HttpStatus.OK);
+
+    }
+
+    public ResponseEntity getAllCategoriesForCustomer(Optional<Long> categoryId) {
+
+        log.info("inside : service -> getAllCategoriesForCustomer");
+
+        if(categoryId.isPresent())
+        {
+            log.info("inside : service -> if -> getAllCategoriesForCustomer");
+            List<Category> immediateChildCategoryList = categoryRepository.getImmediateChildCategories(categoryId.get());
+            List<CategoryViewDto> dtoList = ObjectMapperUtils.mapAllList(immediateChildCategoryList, CategoryViewDto.class);
+            return new ResponseEntity<List<CategoryViewDto>>(dtoList, null, HttpStatus.OK);
+        }
+        else
+         {
+              log.info("inside : service -> else -> getAllCategoriesForCustomer");
+              List<Category> rootCategoryList = categoryRepository.getAllRootCategories();
+              List<CategoryViewDto> dtoList = ObjectMapperUtils.mapAllList(rootCategoryList, CategoryViewDto.class);
+              return new ResponseEntity<List<CategoryViewDto>>(dtoList, null, HttpStatus.OK);
+         }
+
+    }
 }

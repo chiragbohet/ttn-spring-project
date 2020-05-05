@@ -62,30 +62,39 @@ public class Bootstrap implements ApplicationRunner {
     void addDummyCategories()
     {
         log.info("Adding dummy categories...");
-        Category A = new Category();
-        A.setName("A");
-        A.setParentCategory(null);
-        categoryRepository.save(A);
 
-        Category B = new Category();
-        B.setName("B");
-        B.setParentCategory(A);
-        categoryRepository.save(B);
 
-        Category C = new Category();
-        C.setName("C");
-        C.setParentCategory(B);
-        categoryRepository.save(C);
+        // adding root categories
+        Category electronics = new Category();
+        electronics.setName("Electronics");
+        electronics.setParentCategory(null);
+        categoryRepository.save(electronics);
 
-        Category D = new Category();
-        D.setName("D");
-        D.setParentCategory(C);
-        categoryRepository.save(D);
+        Category TVAndAppliances = new Category();
+        TVAndAppliances.setName("TVs & Appliances");
+        TVAndAppliances.setParentCategory(null);
+        categoryRepository.save(TVAndAppliances);
 
-        Category E = new Category();
-        E.setName("D");
-        E.setParentCategory(D);
-        categoryRepository.save(E);
+        Category men = new Category();
+        men.setName("Men");
+        men.setParentCategory(null);
+        categoryRepository.save(men);
+
+        Category women = new Category();
+        women.setName("Women");
+        women.setParentCategory(null);
+        categoryRepository.save(women);
+
+        // adding child categories
+        Category mobiles = new Category();
+        mobiles.setName("Mobiles");
+        mobiles.setParentCategory(categoryRepository.findById(electronics.getId()).get());
+        categoryRepository.save(mobiles);
+
+        Category laptops = new Category();
+        laptops.setName("Laptops");
+
+
 
         log.info("Finished adding dummy categories...");
     }
