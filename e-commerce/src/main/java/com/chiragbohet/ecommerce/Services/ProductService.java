@@ -1,6 +1,7 @@
 package com.chiragbohet.ecommerce.Services;
 
 import com.chiragbohet.ecommerce.Dtos.productapi.ProductDto;
+import com.chiragbohet.ecommerce.Dtos.productapi.ProductVariationDto;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataField;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValues;
@@ -177,7 +178,10 @@ public class ProductService {
         if(productVariation.get().getProduct().getSeller() != seller)
             throw new GenericUserValidationFailedException("The product variation with ID : " + productVariation + " is not associated with your account.");
 
+        // TODO : Check product should be non deleted (soft delete)
 
+        ProductVariationDto dto = modelMapper.map(productVariation.get(),ProductVariationDto.class);
 
+        return new ResponseEntity<ProductVariationDto>(dto,null,HttpStatus.OK);
     }
 }
