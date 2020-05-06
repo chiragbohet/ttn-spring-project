@@ -1,10 +1,12 @@
 package com.chiragbohet.ecommerce.Entities.ProductRelated;
 
+import com.chiragbohet.ecommerce.Utilities.MetadataConverter;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -27,12 +29,14 @@ public class ProductVariation {
     private String primaryImageName;
 
     @Column(name = "IS_ACTIVE")
-    boolean isActive;
+    Boolean isActive;
 
     @ManyToOne
     @JoinColumn(name = "PRODUCT_ID")
     private Product product;
 
-
+    @Column(name = "METADATA")
+    @Convert(converter = MetadataConverter.class)
+    private Map<String, String> metadata;
 
 }

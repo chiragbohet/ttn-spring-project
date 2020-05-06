@@ -120,8 +120,10 @@ public class CategoryService {
 
     public ResponseEntity getAllCategories(Optional<Integer> page, Optional<Integer> size, Optional<String> sortProperty, Optional<String> sortDirection) {
 
-        List<Category> categoryList = categoryRepository.findAll();
-        List<CategoryViewDto> dtoList = ObjectMapperUtils.mapAllList(categoryList, CategoryViewDto.class);
+        Sort.Direction sortingDirection = sortDirection.get().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Page<Category> categoryList = categoryRepository.findAll(PageRequest.of(page.get(), size.get(), sortingDirection, sortProperty.get()));
+        List<CategoryViewDto> dtoList = ObjectMapperUtils.mapAllPage(categoryList, CategoryViewDto.class);
 
         return new ResponseEntity<List<CategoryViewDto>>(dtoList, null, HttpStatus.OK);
 

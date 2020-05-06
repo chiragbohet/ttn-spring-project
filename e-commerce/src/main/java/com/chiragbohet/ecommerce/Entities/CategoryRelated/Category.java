@@ -65,5 +65,13 @@ public class Category {
         }
     }
 
+    public boolean isLeafCategory(){
+        return subCategoriesSet == null;
+    }
+
+    public boolean isRootCategory(){
+        return parentCategory == null;
+    }
+
 
 }

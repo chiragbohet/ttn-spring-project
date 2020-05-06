@@ -22,17 +22,21 @@ public class CategoryController {
     @Autowired
     CategoryService categoryService;
 
+
+    @Secured("ROLE_ADMIN")
     @PostMapping("/metadata-fields")
     public ResponseEntity addNewMetadataField(@Valid @RequestBody CategoryMetadataFieldCo co)
     {
         return categoryService.addNewMetadataField(co);
     }
 
+    @Secured("ROLE_ADMIN")
     @GetMapping("/metadata-fields")
     public ResponseEntity viewAllMetadataFields(@RequestParam(value = "page", defaultValue = GlobalVariables.DEFAULT_PAGE_OFFSET) Optional<Integer> page,
                                                 @RequestParam(value = "size", defaultValue = GlobalVariables.DEFAULT_PAGE_SIZE) Optional<Integer> size,
                                                 @RequestParam(value = "sort", defaultValue = GlobalVariables.DEFAULT_SORT_PROPERTY) Optional<String> sortProperty,
                                                 @RequestParam(value = "direction", defaultValue = GlobalVariables.DEFAULT_SORT_DIRECTION) Optional<String> sortDirection){
+
         return categoryService.getAllMetadataFields(page, size, sortProperty, sortDirection);
     }
 
@@ -87,8 +91,8 @@ public class CategoryController {
 
     @Secured("ROLE_CUSTOMER")
     @GetMapping({"/customer/categories","/customer/categories/{id}"})
-    public ResponseEntity getAllCategoriesForCustomer(@PathVariable(name = "id", required = false) Optional<Long> categoryId)
-    {   log.info("inside : controller -> getAllCategoriesForCustomer");
+    public ResponseEntity getAllCategoriesForCustomer(@PathVariable(name = "id", required = false) Optional<Long> categoryId) {
+        log.info("inside : controller -> getAllCategoriesForCustomer");
         return categoryService.getAllCategoriesForCustomer(categoryId);
     }
 

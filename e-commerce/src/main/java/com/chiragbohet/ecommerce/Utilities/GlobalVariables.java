@@ -2,6 +2,7 @@ package com.chiragbohet.ecommerce.Utilities;
 
 import com.chiragbohet.ecommerce.Repositories.RoleRepository;
 import com.chiragbohet.ecommerce.Security.Role;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,12 +14,10 @@ public class GlobalVariables {
     @Autowired
     RoleRepository roleRepository;
 
-
     public static final String DEFAULT_PAGE_SIZE = "10";
     public static final String DEFAULT_PAGE_OFFSET = "0";
     public static final String DEFAULT_SORT_PROPERTY = "id";
     public static final String DEFAULT_SORT_DIRECTION = "asc";
-
 
     // Regular expressions
 
@@ -41,11 +40,18 @@ public class GlobalVariables {
 
     public static final String MESSAGE_PASSWORD_VALIDATION = "Please enter a valid password! 8-15 characters with atleast 1 lowercase, 1 uppercase, 1 special character, 1 number.";
 
+    public static final String ADMIN_EMAIL_ADDRESS = "bohet.chirag@gmail.com";
 
 
     @Bean
     public ModelMapper modelMapper(){
         return new ModelMapper();
+    }
+
+
+    public static String getAdminEmailAddress()
+    {   // TODO : Get admin email from db
+        return ADMIN_EMAIL_ADDRESS;
     }
 
 }

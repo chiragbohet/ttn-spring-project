@@ -4,6 +4,8 @@ import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataField;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValues;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValuesId;
+import com.chiragbohet.ecommerce.Entities.ProductRelated.Product;
+import com.chiragbohet.ecommerce.Entities.ProductRelated.ProductVariation;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Address;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
 import com.chiragbohet.ecommerce.Repositories.*;
@@ -15,6 +17,10 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 @Log4j2
 @Component
@@ -36,6 +42,12 @@ public class Bootstrap implements ApplicationRunner {
     CategoryRepository categoryRepository;
 
     @Autowired
+    ProductVariationRepository productVariationRepository;
+
+    @Autowired
+    ProductRepository productRepository;
+
+    @Autowired
     CategoryMetadataFieldRepository categoryMetadataFieldRepository;
 
     @Autowired
@@ -51,12 +63,43 @@ public class Bootstrap implements ApplicationRunner {
             addTestSeller();
             addTestCustomer();
             addTestAdmin();
-            addMetadataFields();
             addDummyCategories();
+            addMetadataFields();
+            //addDummyProduct();
+            //addDummyProductVariation();
+
 
             log.info("Total users saved::"+userRepository.count());
 
         }
+    }
+
+    void addDummyProductVariation(){
+        log.info("inside addDummyProductVariation()");
+        ProductVariation productVariation = new ProductVariation();
+        productVariation.setIsActive(true);
+        productVariation.setPrice(new BigDecimal("12000"));
+        productVariation.setQuantityAvailable(1L);
+        productVariation.setPrimaryImageName("Mia2.jpg");
+        productVariation.setProduct(productRepository.findById(1L).get());
+
+        Map<String,String> map = new HashMap<>();
+        map.put("RAM","4gb");
+        productVariation.setMetadata(map);
+        log.info("inside addDummyProductVariation() -> trying to persist");
+        productVariationRepository.save(productVariation);
+        log.info("inside addDummyProductVariation() -> persisted");
+    }
+
+    void addDummyProduct()
+    {   log.trace("Inside addDummyProduct()");
+        Product product = new Product();
+        product.setIsActive(true);
+        product.setCategory(categoryRepository.findById(5l).get());
+        product.setDescription("Android smartphone");
+        product.setBrand("Xiaomi");
+        product.setName("Mi A2");
+        productRepository.save(product);
     }
 
     void addDummyCategories()
@@ -93,7 +136,8 @@ public class Bootstrap implements ApplicationRunner {
 
         Category laptops = new Category();
         laptops.setName("Laptops");
-
+        laptops.setParentCategory(categoryRepository.findById(electronics.getId()).get());
+        categoryRepository.save(laptops);
 
 
         log.info("Finished adding dummy categories...");
@@ -102,32 +146,23 @@ public class Bootstrap implements ApplicationRunner {
 
     void addMetadataFields()
     {
-        Category category = new Category();
-        category.setParentCategory(null);
-        category.setName("Mobile Phones");
-        categoryRepository.save(category);
+        CategoryMetadataField ram = new CategoryMetadataField();
+        ram.setName("RAM");
+        categoryMetadataFieldRepository.save(ram);
 
+        //Mobile RAM fiel
+        CategoryMetadataFieldValues mobileRam = new CategoryMetadataFieldValues();
+        mobileRam.setCategory(categoryRepository.findByName("Mobiles"));
+        mobileRam.setCategoryMetadataField(categoryMetadataFieldRepository.findByName("RAM"));
+        mobileRam.setValues("2gb,4gb,6gb,8gb");
+        categoryMetadataFieldValuesRepository.save(mobileRam);
 
-        CategoryMetadataField field = new CategoryMetadataField();
-        field.setName("Megapixels");
-        categoryMetadataFieldRepository.save(field);
-
-
-        CategoryMetadataFieldValues values = new CategoryMetadataFieldValues();
-        values.setValues("4mp,8mp,10mp,12p,14mp,18mp");
-
-
-        Category c = categoryRepository.findById(category.getId()).get();
-        CategoryMetadataField cm = categoryMetadataFieldRepository.findById(field.getId()).get();
-
-        c.addFieldValues(values);
-        cm.addFieldValues(values);
-
-        //categoryRepository.save(c);
-        //categoryMetadataFieldRepository.save(cm);
-
-        //persisting
-        categoryMetadataFieldValuesRepository.save(values);
+        //Laptop RAM field
+        CategoryMetadataFieldValues laptopRam = new CategoryMetadataFieldValues();
+        laptopRam.setCategory(categoryRepository.findByName("Laptops"));
+        laptopRam.setCategoryMetadataField(categoryMetadataFieldRepository.findByName("RAM"));
+        laptopRam.setValues("4gb,8gb,16gb,32gb");
+        categoryMetadataFieldValuesRepository.save(laptopRam);
 
 
     }
@@ -230,11 +265,12 @@ public class Bootstrap implements ApplicationRunner {
     {
         Customer admin = new Customer();
 
-        admin.setFirstName("Test");
+        admin.setFirstName("Chirag");
         admin.setMiddleName("Admin");
-        admin.setEmail("testadmin@localhost.com");
+        admin.setLastName("Bohet");
+        admin.setEmail("bohet.chirag@gmail.com");
         admin.setPassword(passwordEncoder.encode("1A2a$5AA"));
-        admin.setContact("9999999999");
+        admin.setContact("9654476321");
 
         admin.setActive(true);  // will be activated via email
         admin.setDeleted(false);
@@ -243,7 +279,6 @@ public class Bootstrap implements ApplicationRunner {
         admin.setAccountNonExpired(true);
         admin.setAccountNonLocked(true);
         admin.setCredentialsNonExpired(true);
-        admin.setEnabled(true);
         admin.setEnabled(true);
 
         // adding ADMIN role

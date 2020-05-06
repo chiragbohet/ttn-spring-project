@@ -1,8 +1,10 @@
 package com.chiragbohet.ecommerce.Entities.ProductRelated;
 
+import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
+@ToString
 @Table(name = "PRODUCT")
 public class Product {
 
@@ -29,21 +32,31 @@ public class Product {
     String brand;
 
     @Column(name = "IS_CANCELLABLE")
-    boolean isCancellable;
+    Boolean isCancellable;
 
     @Column(name = "IS_RETURNABLE")
-    boolean isReturnable;
+    Boolean isReturnable;
 
     @Column(name = "IS_ACTIVE")
-    boolean isActive;
+    Boolean isActive;
 
-    @ManyToMany(mappedBy = "productSet")
-    Set<Seller> sellerSet;
+    @ManyToOne
+    @JoinColumn(name = "CATEGORY_ID")
+    Category category;
+
+    @ManyToOne
+    @JoinColumn(name = "SELLER_ID")
+    Seller seller;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     Set<ProductVariation> productVariationSet;
 
+    public Product()
+    {
+        this.isCancellable = false;
+        this.isReturnable = false;
+        this.isActive = false;
+    }
 
-    //TODO : Add category field
 
 }

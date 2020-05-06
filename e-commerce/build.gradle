@@ -35,6 +35,10 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-mail
 	compile group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.2.5.RELEASE'
 
+	// Jackson Databind for Map Converters
+	// https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
+
 
 }
 

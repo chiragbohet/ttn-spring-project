@@ -112,6 +112,17 @@ public class EmailSenderService {
         return mailMessage;
     }
 
+    public SimpleMailMessage getAdminNewProductAddedIntimidationEmail(String productDetails)
+    {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(GlobalVariables.getAdminEmailAddress());
+        mailMessage.setSubject("New product Added!");
+        mailMessage.setFrom(senderEmail);
+        mailMessage.setText(productDetails);
+
+        return mailMessage;
+    }
+
 
 
 }
