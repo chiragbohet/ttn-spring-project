@@ -1,5 +1,6 @@
 package com.chiragbohet.ecommerce.Services;
 
+import com.chiragbohet.ecommerce.Dtos.productapi.ProductDto;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataField;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValues;
@@ -138,5 +139,45 @@ public class ProductService {
         productVariationRepository.save(productVariation);
         log.info("Inside addNewProductVariation() - > mapped co to object, persisted!");
         return new ResponseEntity(HttpStatus.CREATED);
+    }
+
+    public ResponseEntity getSellerProduct(String sellerEmail, Long productId) {
+
+        Seller seller = sellerRepository.findByEmail(sellerEmail);
+
+        // unlikely, but still handling.
+        if(seller == null)
+            throw new ResourceNotFoundException("No seller found with email : " + sellerEmail + ". Please contact customer care.");
+
+        Optional<Product> product = productRepository.findById(productId);
+        if(!product.isPresent())
+            throw new ResourceNotFoundException("No product found with ID : " + productId);
+        if(product.get().getSeller() != seller)
+            throw new GenericUserValidationFailedException("The product ID : " + productId + " is not associated with your account.");
+
+        // TODO : Check product should be non deleted (soft delete)
+
+        ProductDto dto = modelMapper.map(product.get(), ProductDto.class);
+
+        return new ResponseEntity<ProductDto>(dto, null, HttpStatus.OK);
+    }
+
+    public ResponseEntity getSellerProductVariation(String sellerEmail, Long productVariationId) {
+
+        Seller seller = sellerRepository.findByEmail(sellerEmail);
+
+        // unlikely, but still handling.
+        if(seller == null)
+            throw new ResourceNotFoundException("No seller found with email : " + sellerEmail + ". Please contact customer care.");
+
+        Optional<ProductVariation> productVariation = productVariationRepository.findById(productVariationId);
+
+        if(!productVariation.isPresent())
+            throw new ResourceNotFoundException("No product variation found with ID : " + productVariationId);
+        if(productVariation.get().getProduct().getSeller() != seller)
+            throw new GenericUserValidationFailedException("The product variation with ID : " + productVariation + " is not associated with your account.");
+
+
+
     }
 }
