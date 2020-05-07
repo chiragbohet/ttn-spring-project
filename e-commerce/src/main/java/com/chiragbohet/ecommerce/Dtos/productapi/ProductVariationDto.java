@@ -19,7 +19,7 @@ public class ProductVariationDto {
     Boolean isActive;
 
     private String primaryImageName;
-    
+
     private Map<String, String> metadata;
 
 }

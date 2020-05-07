@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -56,6 +57,21 @@ public class Product {
         this.isCancellable = false;
         this.isReturnable = false;
         this.isActive = false;
+    }
+
+    public void addProductVariation(ProductVariation... productVariations)
+    {
+        if(productVariations != null)
+        {
+            if(productVariationSet == null)
+                productVariationSet = new HashSet<>();
+
+            for(ProductVariation productVariation : productVariations)
+            {
+                productVariation.setProduct(this);
+                productVariationSet.add(productVariation);
+            }
+        }
     }
 
 

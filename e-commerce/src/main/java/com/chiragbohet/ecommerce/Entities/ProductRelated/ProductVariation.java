@@ -39,4 +39,5 @@ public class ProductVariation {
     @Convert(converter = MetadataConverter.class)
     private Map<String, String> metadata;
 
+
 }

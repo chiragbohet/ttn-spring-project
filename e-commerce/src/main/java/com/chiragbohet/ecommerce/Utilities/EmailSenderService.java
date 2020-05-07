@@ -123,6 +123,27 @@ public class EmailSenderService {
         return mailMessage;
     }
 
+    public SimpleMailMessage getSellerProductDeactivatedIntimidationEmail(String sellerEmail, String productDetails)
+    {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(sellerEmail);
+        mailMessage.setSubject("Product Deactivated!");
+        mailMessage.setFrom(senderEmail);
+        mailMessage.setText("The following product has been deactivated by the admin. Contact us for more info...\n"+productDetails);
+
+        return mailMessage;
+    }
+
+    public SimpleMailMessage getSellerProductActivatedIntimidationEmail(String sellerEmail, String productDetails)
+    {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(sellerEmail);
+        mailMessage.setSubject("Product Activated!");
+        mailMessage.setFrom(senderEmail);
+        mailMessage.setText("The following product has been Activated by the admin.\n"+productDetails);
+
+        return mailMessage;
+    }
 
 
 }
