@@ -30,12 +30,6 @@ public class Customer extends User {
     // TODO : Uncomment this
     public Customer()
     {
-        List<Role> roles = new ArrayList<>();
-        Role ROLE_CUSTOMER = new Role("ROLE_CUSTOMER");
-        roles.add(ROLE_CUSTOMER);
-
-        this.setRoleList(roles);
-
         this.setActive(false);  // will be activated via email
         this.setDeleted(false);
         // spring security related fields

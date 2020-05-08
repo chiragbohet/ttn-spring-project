@@ -23,16 +23,15 @@ public class Category {
     @Column(name = "NAME")
     String name;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "PARENT_ID")
+    Category parentCategory;
+
     @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     Set<Category> subCategoriesSet;
 
-
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     Set<CategoryMetadataFieldValues> fieldValuesSet;
-
-    @ManyToOne
-    @JoinColumn(name = "PARENT_ID")
-    Category parentCategory;
 
     public void addFieldValues(CategoryMetadataFieldValues... values)
     {

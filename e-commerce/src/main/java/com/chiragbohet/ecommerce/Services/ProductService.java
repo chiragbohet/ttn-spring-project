@@ -20,9 +20,11 @@ import com.chiragbohet.ecommerce.co.ProductUpdateCo;
 import com.chiragbohet.ecommerce.co.ProductVariationCo;
 import com.chiragbohet.ecommerce.co.ProductVariationUpdateCo;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -33,7 +35,7 @@ import org.w3c.dom.ls.LSOutput;
 
 import java.util.*;
 
-@Log4j2
+@Slf4j
 @Service
 public class ProductService {
 
@@ -387,27 +389,42 @@ public class ProductService {
 
     public ResponseEntity getAllProductsForCustomer(Long categoryId, Optional<Integer> page, Optional<Integer> size, Optional<String> sortDirection, Optional<String> sortProperty) {
 
-        // get category specific products
-        Optional<Category> requestedCategory = categoryRepository.findById(categoryId);
-
-        if (!requestedCategory.isPresent())
-            throw new ResourceNotFoundException("No category found with ID " + categoryId);
-
         Sort.Direction sortingDirection = sortDirection.get().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-        List<Product> productList = null;
+        log.trace("Inside getAllProductsForCustomer()");
+        Optional<Category> requestedCategory = categoryRepository.findById(categoryId);
 
-        if (requestedCategory.get().isLeafCategory())
-            productList = productRepository.getAllProductsByCategoryId(categoryId, PageRequest.of(page.get(), size.get(), sortingDirection, sortProperty.get()));
+        if(!requestedCategory.isPresent())
+            throw new ResourceNotFoundException("No category found with ID : " + categoryId);
+
+        List<Product> products = null;
+
+        if(requestedCategory.get().isLeafCategory())
+        {
+            log.trace("Inside getAllProductsForCustomer() -> valid leaf category");
+            products = productRepository.getAllProductsByCategoryId(requestedCategory.get().getId(), PageRequest.of(page.get(), size.get(), sortingDirection, sortProperty.get()));
+
+        }
         else
-            productList = productRepository.getAllLeafNodeCategoryProducts(PageRequest.of(page.get(), size.get(), sortingDirection, sortProperty.get()));
+        {
+            log.trace("Inside getAllProductsForCustomer()  -> not a leaf category");
+            products = productRepository.getAllLeafNodeCategoryProducts(PageRequest.of(page.get(), size.get(), sortingDirection, sortProperty.get()));
+        }
 
-            if (productList.size() == 0)
-                throw new ResourceNotFoundException("No product available for your request!");
+        List<ProductAdminViewDto> dtos = ObjectMapperUtils.mapAllList(products, ProductAdminViewDto.class);
 
-            List<ProductAdminViewDto> dtoList = ObjectMapperUtils.mapAllList(productList, ProductAdminViewDto.class);
 
-            return new ResponseEntity<List<ProductAdminViewDto>>(dtoList, null, HttpStatus.OK);
+        return new ResponseEntity<>(dtos,null,HttpStatus.OK);
+    }
 
+
+    public ResponseEntity getAllProductsForAdmin(Optional<Integer> page, Optional<Integer> size, Optional<String> sortDirection, Optional<String> sortProperty) {
+
+        Sort.Direction sortingDirection = sortDirection.get().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        // TODO : Return all non (soft) deleted products.
+        Page<Product> productList = productRepository.findAll(PageRequest.of(page.get(),size.get(),sortingDirection,sortProperty.get()));
+        List<ProductAdminViewDto> dtos = ObjectMapperUtils.mapAllPage (productList, ProductAdminViewDto.class);
+
+        return new ResponseEntity<>(dtos,null,HttpStatus.OK);
     }
 }

@@ -95,6 +95,18 @@ public class ProductController {
     }
 
     @Secured("ROLE_ADMIN")
+    @GetMapping("/admin/products")
+    public ResponseEntity getAllProductsForAdmin(@RequestParam(value = "page", defaultValue = GlobalVariables.DEFAULT_PAGE_OFFSET) Optional<Integer> page,
+                                                 @RequestParam(value = "size", defaultValue = GlobalVariables.DEFAULT_PAGE_SIZE) Optional<Integer> size,
+                                                 @RequestParam(value = "sort", defaultValue = GlobalVariables.DEFAULT_SORT_PROPERTY) Optional<String> sortProperty,
+                                                 @RequestParam(value = "direction", defaultValue = GlobalVariables.DEFAULT_SORT_DIRECTION) Optional<String> sortDirection)
+    {
+        return productService.getAllProductsForAdmin(page, size, sortDirection, sortProperty);
+    }
+
+
+
+    @Secured("ROLE_ADMIN")
     @PutMapping("/admin/deactivate/products/{productId}")
     public ResponseEntity deactivateProductForAdmin(@PathVariable("productId") Long productId)
     {

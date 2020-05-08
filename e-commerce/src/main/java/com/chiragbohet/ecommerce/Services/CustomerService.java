@@ -268,7 +268,6 @@ public class CustomerService {
     public ResponseEntity registerNewCustomer(CustomerRegistrationDto customerRegistrationDto) throws UserAlreadyExistsException {
 
         Customer customer = modelMapper.map(customerRegistrationDto, Customer.class);   // converting DTO to POJO
-
         if(customerRepository.findByEmail(customer.getEmail()) != null) // User already exists with given email
             throw new UserAlreadyExistsException("User already exists with email : " + customer.getEmail());
         else if(!customerRegistrationDto.getPassword().equals(customerRegistrationDto.getConfirmPassword()))

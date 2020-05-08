@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    @Query(value = "SELECT * FROM CATEGORY WHERE CATEGORY.ID NOT IN (SELECT Category_ID FROM CATEGORY_subCategoriesSet)", nativeQuery = true)
+    @Query(value = "SELECT * FROM CATEGORY WHERE PARENT_ID NOT IN (SELECT PARENT_ID FROM CATEGORY WHERE PARENT_ID IS NOT NULL)", nativeQuery = true)
     List<Category> getAllLeafCategories();
 
     @Query("FROM Category WHERE parentCategory IS NULL")

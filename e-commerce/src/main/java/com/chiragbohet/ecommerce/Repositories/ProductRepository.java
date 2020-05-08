@@ -16,11 +16,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> getAllProductsBySellerId(@Param("sellerId") Long sellerId, Pageable pageable);
 
     // TODO : Filter products based on non deletion (soft delete)
-    @Query(value = "SELECT * FROM PRODUCT WHERE CATEGORY_ID = :categoryId AND ID IN (SELECT Product_ID FROM PRODUCT_productVariationSet)", nativeQuery = true)
+                                                                           // Belongs to a leaf category
+    @Query(value = "SELECT * FROM PRODUCT WHERE CATEGORY_ID = :categoryId AND CATEGORY_ID NOT IN (SELECT PARENT_ID FROM CATEGORY WHERE PARENT_ID IS NOT NULL)", nativeQuery = true)
     List<Product> getAllProductsByCategoryId(@Param("categoryId") Long categoryId, Pageable pageable);
 
     // TODO : Filter products based on non deletion (soft delete)
-    @Query(value = "SELECT * FROM PRODUCT WHERE CATEGORY_ID NOT IN (SELECT Category_ID FROM CATEGORY_subCategoriesSet)", nativeQuery = true)
+    @Query(value = "SELECT * FROM PRODUCT WHERE CATEGORY_ID NOT IN (SELECT PARENT_ID FROM CATEGORY WHERE PARENT_ID IS NOT NULL)", nativeQuery = true)
     List<Product> getAllLeafNodeCategoryProducts(Pageable pageable);
 
 }
