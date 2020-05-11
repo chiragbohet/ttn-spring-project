@@ -3,7 +3,6 @@ package com.chiragbohet.ecommerce.Security;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataField;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValues;
-import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValuesId;
 import com.chiragbohet.ecommerce.Entities.ProductRelated.Product;
 import com.chiragbohet.ecommerce.Entities.ProductRelated.ProductVariation;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Address;
@@ -19,10 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Log4j2
 @Component
@@ -62,17 +58,24 @@ public class Bootstrap implements ApplicationRunner {
         if(userRepository.count()<1){
 
             addRoles();
-
-            addTestSeller();
+            addAdmin();
             addTestCustomer();
-            addTestAdmin();
-            addDummyCategories();
-
+            addTestSeller();
+            addBasicCategories();
             addMetadataFields();
+            addMetadataFieldValues();
             addDummyProduct();
             addDummyProductVariation();
 
         }
+    }
+
+    void addRoles()
+    {
+        roleRepository.save(new Role("ROLE_SELLER"));
+        roleRepository.save(new Role("ROLE_ADMIN"));
+        roleRepository.save(new Role("ROLE_CUSTOMER"));
+
     }
 
     private void addAdmin()
@@ -94,141 +97,44 @@ public class Bootstrap implements ApplicationRunner {
                        roleRepository.findByAuthority("ROLE_CUSTOMER"));
 
         customerRepository.save(admin);
-
     }
 
-    void addTestAdmin()
+    void addTestCustomer()
     {
-        Customer admin = new Customer();
+        Customer testCustomer = new Customer();
 
-        admin.setFirstName("Chirag");
-        admin.setMiddleName("Admin");
-        admin.setLastName("Bohet");
-        admin.setEmail("bohet.chirag@gmail.com");
-        admin.setPassword(passwordEncoder.encode("1A2a$5AA"));
-        admin.setContact("9654476321");
+        testCustomer.setFirstName("Test");
+        testCustomer.setMiddleName("Customer");
+        testCustomer.setEmail("chirag.mca17.du@gmail.com");
+        testCustomer.setPassword(passwordEncoder.encode("1A2a$5AA"));
+        testCustomer.setContact("9654476321");
 
-        admin.setActive(true);  // will be activated via email
-        admin.setDeleted(false);
+        testCustomer.setActive(true);  // is deactivated by constructor so activating it
 
-        // spring security related fields
-        admin.setAccountNonExpired(true);
-        admin.setAccountNonLocked(true);
-        admin.setCredentialsNonExpired(true);
-        admin.setEnabled(true);
+        // setting role
+        testCustomer.addRoles(roleRepository.findByAuthority("ROLE_CUSTOMER"));
 
-        // adding ADMIN role
+        // address
+        Address address = new Address();
 
-        Role ROLE_ADMIN = new Role("ROLE_ADMIN");
-        admin.addRoles(ROLE_ADMIN);
+        address.setAddressLine("Plot No - 19, Gali No - 2, Opposite Radha Swami Satsang, Narela");
+        address.setCity("New Delhi");
+        address.setState("Delhi");
+        address.setCountry("India");
+        address.setLabel("Primary");
+        address.setZipCode("110040");
 
-        customerRepository.save(admin);
-    }
+        Address address2 = new Address();
+        address2.setAddressLine("2nd Floor, NSL Techzone IT SEZ");
+        address2.setCity("Noida");
+        address2.setState("Uttar Pradesh");
+        address2.setCountry("India");
+        address2.setLabel("Primary");
+        address2.setZipCode("201306");
 
-    void addDummyProductVariation(){
-        log.info("inside addDummyProductVariation()");
-        ProductVariation productVariation = new ProductVariation();
-        productVariation.setIsActive(true);
-        productVariation.setPrice(new BigDecimal("12000"));
-        productVariation.setQuantityAvailable(1L);
-        productVariation.setPrimaryImageName("Mia2.jpg");
-        productVariation.setProduct(productRepository.findById(1L).get());
+        testCustomer.addAddress(address,address2);
 
-        Map<String,String> map = new HashMap<>();
-        map.put("RAM","4gb");
-        productVariation.setMetadata(map);
-        log.info("inside addDummyProductVariation() -> trying to persist");
-        productVariationRepository.save(productVariation);
-        log.info("inside addDummyProductVariation() -> persisted");
-    }
-
-    void addDummyProduct()
-    {   log.trace("Inside addDummyProduct()");
-        Product product = new Product();
-        product.setIsActive(true);
-        product.setCategory(categoryRepository.findById(5l).get());
-        product.setDescription("Android smartphone");
-        product.setBrand("Xiaomi");
-        product.setName("Mi A2");
-        productRepository.save(product);
-    }
-
-    void addDummyCategories()
-    {
-        log.info("Adding dummy categories...");
-
-
-        // adding root categories
-        Category electronics = new Category();
-        electronics.setName("Electronics");
-        electronics.setParentCategory(null);
-        categoryRepository.save(electronics);
-
-        Category TVAndAppliances = new Category();
-        TVAndAppliances.setName("TVs & Appliances");
-        TVAndAppliances.setParentCategory(null);
-        categoryRepository.save(TVAndAppliances);
-
-        Category men = new Category();
-        men.setName("Men");
-        men.setParentCategory(null);
-        categoryRepository.save(men);
-
-        Category women = new Category();
-        women.setName("Women");
-        women.setParentCategory(null);
-        categoryRepository.save(women);
-
-        // adding child categories
-
-        Category electronicsParent = categoryRepository.findById(electronics.getId()).get();
-
-        Category mobiles = new Category();
-        mobiles.setName("Mobiles");
-
-        //mobiles.setParentCategory(categoryRepository.findByName("Electronics"));
-        //categoryRepository.save(mobiles);
-
-        Category laptops = new Category();
-        laptops.setName("Laptops");
-        //laptops.setParentCategory(categoryRepository.findByName("Electronics"));
-        //categoryRepository.save(laptops);
-
-        electronicsParent.addSubCategory(mobiles, laptops);
-        categoryRepository.save(electronicsParent);
-
-        log.info("Finished adding dummy categories...");
-    }
-
-
-    void addMetadataFields()
-    {
-        CategoryMetadataField ram = new CategoryMetadataField();
-        ram.setName("RAM");
-        categoryMetadataFieldRepository.save(ram);
-
-        //Mobile RAM field
-        CategoryMetadataFieldValues mobileRam = new CategoryMetadataFieldValues();
-        mobileRam.setCategory(categoryRepository.findByName("Mobiles"));
-        mobileRam.setCategoryMetadataField(categoryMetadataFieldRepository.findByName("RAM"));
-        mobileRam.setValues("2gb,4gb,6gb,8gb");
-        categoryMetadataFieldValuesRepository.save(mobileRam);
-
-        //Laptop RAM field
-        CategoryMetadataFieldValues laptopRam = new CategoryMetadataFieldValues();
-        laptopRam.setCategory(categoryRepository.findByName("Laptops"));
-        laptopRam.setCategoryMetadataField(categoryMetadataFieldRepository.findByName("RAM"));
-        laptopRam.setValues("4gb,8gb,16gb,32gb");
-        categoryMetadataFieldValuesRepository.save(laptopRam);
-
-
-    }
-
-    void addRoles()
-    {
-        roleRepository.save(new Role("ROLE_SELLER"));
-        roleRepository.save(new Role("ROLE_ADMIN"));
-        roleRepository.save(new Role("ROLE_CUSTOMER"));
+        customerRepository.save(testCustomer);
 
     }
 
@@ -239,10 +145,10 @@ public class Bootstrap implements ApplicationRunner {
         // common fields
         seller.setFirstName("Test");
         seller.setMiddleName("Seller");
-        seller.setEmail("testseller@localhost.com");
+        seller.setEmail("chirag.bohet@tothenew.com");
         seller.setPassword(passwordEncoder.encode("1A2a$5AA"));
 
-        //seller specific fields
+
         Address address = new Address();
         address.setAddressLine("2nd Floor, NSL Techzone IT SEZ");
         address.setCity("Noida");
@@ -251,68 +157,247 @@ public class Bootstrap implements ApplicationRunner {
         address.setLabel("Primary");
         address.setZipCode("201306");
 
-        seller.setCompanyContact("9999999999");
+        //seller specific fields
+        seller.setCompanyContact("9654476321");
         seller.setCompanyName("To The New");
-        seller.setAddress(address);
-        address.setUser(seller);// TODO : Fix this infinite loop
+        seller.addAddress(address);
         seller.setGst("18AABCT3518Q1ZV");
 
+        seller.addRoles(roleRepository.findByAuthority("ROLE_SELLER"));
+        seller.setActive(true); // false by default
 
-        seller.setActive(false);  // will be activated by Admin
-        seller.setDeleted(false);
-        // spring security related fields
-        seller.setAccountNonExpired(true);
-        seller.setAccountNonLocked(true);
-        seller.setCredentialsNonExpired(true);
-        seller.setEnabled(true);
         sellerRepository.save(seller);
 
     }
 
-
-    void addTestCustomer()
+    void addBasicCategories()
     {
-        Customer customer = new Customer();
+        /*
+        * Current Structure
+        *
+        * Electronics -> Mobiles
+        *             -> Laptops
+        *             -> Cameras
+        *
+        * TVs and Appliances -> Television
+        *                    -> Kitchen Appliances
+        *
+        * Men -> Footwear
+        *     -> Clothing
+        *
+        * Women -> Footwear
+        *       -> Clothing
+        *
+        * Home & Furniture -> Kitchen, Cookware & Serveware
+        *                  -> Furnishing
+        *
+        * Sports, Books & More -> Sports
+        *                      -> Books
+        *                      -> Stationery
+        *
+        * */
 
-        customer.setFirstName("Test");
-        customer.setMiddleName("Customer");
-        customer.setEmail("testcustomer@localhost.com");
-        customer.setPassword(passwordEncoder.encode("1A2a$5AA"));
-        customer.setContact("9999999999");
+        // Electronics Chain
+        Category electronics = new Category();
+        electronics.setName("Electronics");
+        electronics.setParentCategory(null);
 
-        customer.setActive(false);  // will be activated via email
-        customer.setDeleted(false);
+        Category mobiles = new Category();
+        mobiles.setName("Mobiles");
+        mobiles.setParentCategory(electronics);
 
-        // spring security related fields
-        customer.setAccountNonExpired(true);
-        customer.setAccountNonLocked(true);
-        customer.setCredentialsNonExpired(true);
-        customer.setEnabled(true);
-        customer.setEnabled(true);
 
-        // address
-        Address address = new Address();
-        address.setAddressLine("2nd Floor, NSL Techzone IT SEZ");
-        address.setCity("Noida");
-        address.setState("Uttar Pradesh");
-        address.setCountry("India");
-        address.setLabel("Primary");
-        address.setZipCode("201306");
-        customer.addAddress(address);
+        Category laptops = new Category();
+        laptops.setName("Laptops");
+        laptops.setParentCategory(electronics);
 
-        Address address2 = new Address();
-        address2.setAddressLine("2nd Floor, NSL Techzone IT SEZ");
-        address2.setCity("Noida");
-        address2.setState("Uttar Pradesh");
-        address2.setCountry("India");
-        address2.setLabel("Primary");
-        address2.setZipCode("201306");
+        Category cameras = new Category();
+        cameras.setName("Cameras");
+        cameras.setParentCategory(electronics);
 
-        customer.addAddress(address2);
+        electronics.addSubCategory(mobiles, laptops, cameras);
+        categoryRepository.save(electronics);
 
-        customerRepository.save(customer);
+        // TVs and Appliances chain
+        Category tvsAndAppliances = new Category();
+        tvsAndAppliances.setName("TVs and Appliances");
+        tvsAndAppliances.setParentCategory(null);
+
+        Category televisions = new Category();
+        televisions.setName("Televisions");
+        televisions.setParentCategory(tvsAndAppliances);
+
+        Category kitchenAppliances = new Category();
+        kitchenAppliances.setName("Kitchen Appliances");
+        kitchenAppliances.setParentCategory(tvsAndAppliances);
+
+        tvsAndAppliances.addSubCategory(televisions, kitchenAppliances);
+        categoryRepository.save(tvsAndAppliances);
+
+        // Home & Appliances chain
+        Category homeAndAppliances = new Category();
+        homeAndAppliances.setName("Home & Appliances");
+        homeAndAppliances.setParentCategory(null);
+
+        Category kitchenCookwareAndServeware = new Category();
+        kitchenCookwareAndServeware.setName("Kitchen, Cookware & Serveware");
+        kitchenCookwareAndServeware.setParentCategory(homeAndAppliances);
+
+        Category furnishing = new Category();
+        furnishing.setName("Furnishing");
+        furnishing.setParentCategory(homeAndAppliances);
+
+        homeAndAppliances.addSubCategory(kitchenCookwareAndServeware, furnishing);
+        categoryRepository.save(homeAndAppliances);
+
+        // Sports,Books & More chain
+        Category sportsBooksAndMore = new Category();
+        sportsBooksAndMore.setName("Sports,Books & More");
+        sportsBooksAndMore.setParentCategory(null);
+
+        Category sports = new Category();
+        sports.setName("Sports");
+        sports.setParentCategory(sportsBooksAndMore);
+
+        Category books = new Category();
+        books.setName("Books");
+        books.setParentCategory(sportsBooksAndMore);
+
+        Category stationery = new Category();
+        stationery.setName("Stationery");
+        stationery.setParentCategory(sportsBooksAndMore);
+
+        sportsBooksAndMore.addSubCategory(sports, books, stationery);
+        categoryRepository.save(sportsBooksAndMore);
 
     }
+
+
+
+    void addMetadataFields()
+    {
+        // mobile and laptop related
+        categoryMetadataFieldRepository.saveAll(
+                new ArrayList<>(Arrays.asList(
+                new CategoryMetadataField("RAM"),
+                new CategoryMetadataField("Screen Size"),
+                new CategoryMetadataField("Touch Screen"),
+                new CategoryMetadataField("OS"),
+                new CategoryMetadataField("Primary Camera"),
+                new CategoryMetadataField("Internal Storage"),
+                new CategoryMetadataField("Graphics Memory"),
+                new CategoryMetadataField("Hard Disk Capacity"),
+                new CategoryMetadataField("Processor Brand")
+        )));
+
+    }
+
+    void addMetadataFieldValues()
+    {
+        // mobile related field values
+        Category mobilesCategory = categoryRepository.findByName("Mobiles");
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(mobilesCategory,categoryMetadataFieldRepository.findByName("RAM"), "2gb,4b,6gb,8gb"));
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(mobilesCategory, categoryMetadataFieldRepository.findByName("Screen Size"),"4 Inch,5 Inch,6 Inch"));
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(mobilesCategory, categoryMetadataFieldRepository.findByName("OS"), "Android,IOS,Other"));
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(mobilesCategory, categoryMetadataFieldRepository.findByName("Primary Camera"),"10mp,12mp,16mp,18mp,20mp,48mp"));
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(mobilesCategory, categoryMetadataFieldRepository.findByName("Internal Storage"), "16gb,32gb,64gb,128gb,256gb,512gb"));
+
+
+        // laptop related field values
+        Category laptopsCategory = categoryRepository.findByName("Laptops");
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(laptopsCategory, categoryMetadataFieldRepository.findByName("RAM"), "4gb,8gb,12gb,16gb,32gb,64gb"));
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(laptopsCategory, categoryMetadataFieldRepository.findByName("OS"), "Windows,Linux,MAC OS"));
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(laptopsCategory, categoryMetadataFieldRepository.findByName("Screen Size"), "13 Inch,14 Inch,15 Inch,17 Inch"));
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(laptopsCategory, categoryMetadataFieldRepository.findByName("Hard Disk Capacity"), "250gb,500gb,1tb,2tb,4tb"));
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(laptopsCategory, categoryMetadataFieldRepository.findByName("Touch Screen"), "Yes,No"));
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(laptopsCategory, categoryMetadataFieldRepository.findByName("Processor Brand"), "Intel,AMD,Other"));
+        categoryMetadataFieldValuesRepository.save(new CategoryMetadataFieldValues(laptopsCategory, categoryMetadataFieldRepository.findByName("Graphics Memory"), "2gb,4gb,6gb,8gb,12gb,16gb"));
+
+    }
+
+    void addDummyProduct()
+    {   // One Plus 7
+        Product onePlus7 = new Product();
+        onePlus7.setName("One Plus 7");
+        onePlus7.setBrand("One Plus");
+        onePlus7.setDescription("Android Smartphone");
+        onePlus7.setIsActive(true);
+        onePlus7.setIsReturnable(true);
+        onePlus7.setIsCancellable(true);
+        onePlus7.setCategory(categoryRepository.findByName("Mobiles"));
+        onePlus7.setSeller(sellerRepository.findByEmail("chirag.bohet@tothenew.com"));
+        productRepository.save(onePlus7);
+
+        // thinkpad laptop
+        Product thinkpad = new Product();
+        thinkpad.setName("Thinkpad");
+        thinkpad.setBrand("Lenovo");
+        thinkpad.setDescription("Business Laptop");
+        thinkpad.setIsActive(true);
+        thinkpad.setIsCancellable(true);
+        thinkpad.setIsCancellable(true);
+        thinkpad.setCategory(categoryRepository.findByName("Laptops"));
+        thinkpad.setSeller(sellerRepository.findByEmail("chirag.bohet@tothenew.com"));
+        productRepository.save(thinkpad);
+    }
+
+    void addDummyProductVariation(){
+
+        ProductVariation thinkpadE490 = new ProductVariation();
+
+        Product thinkpad = productRepository.findByName("Thinkpad").get();
+        thinkpad.addProductVariation(thinkpadE490);
+
+        thinkpadE490.setIsActive(true);
+        thinkpadE490.setPrimaryImageName("thinkpade490.jpg");
+        thinkpadE490.setPrice(new BigDecimal("70000"));
+        thinkpadE490.setQuantityAvailable(10L);
+
+        Map<String,String> thinkpadE490Metadata = new TreeMap<>();
+        thinkpadE490Metadata.put("RAM","16gb");
+        thinkpadE490Metadata.put("OS","Linux");
+        thinkpadE490Metadata.put("Screen Size","14 Inch");
+        thinkpadE490Metadata.put("Hard Disk Capacity","1tb");
+        thinkpadE490Metadata.put("Touch Screen","No");
+        thinkpadE490Metadata.put("Processor Brand","Intel");
+
+        thinkpadE490.setMetadata(thinkpadE490Metadata); // product must be set before this, else null pointer exception
+
+        // TODO : idk if this is a bug? how can this be solved?
+        // saving the product instead of the variation so that variation set is properly set -> changes are cascaded
+        productRepository.save(thinkpad);
+
+
+        ProductVariation onePlus7_6gb = new ProductVariation();
+
+        Product onePlus7 = productRepository.findByName("One Plus 7").get();
+        onePlus7.addProductVariation(onePlus7_6gb);
+
+        onePlus7_6gb.setQuantityAvailable(5L);
+        onePlus7_6gb.setPrice(new BigDecimal("30000"));
+        onePlus7_6gb.setPrimaryImageName("oneplus7_6gb.jpg");
+        onePlus7_6gb.setIsActive(true);
+
+        Map<String, String> onePlus7_6gbMetadata = new TreeMap<>();
+        onePlus7_6gbMetadata.put("RAM","6gb");
+        onePlus7_6gbMetadata.put("Screen Size","6 Inch");
+        onePlus7_6gbMetadata.put("OS","Android");
+        onePlus7_6gbMetadata.put("Primary Camera","48mp");
+
+        onePlus7_6gb.setMetadata(onePlus7_6gbMetadata); // product must be set before this, else null pointer exception
+
+        // TODO : idk if this is a bug? how can this be solved?
+        // saving the product instead of the variation so that variation set is properly set, changes are cascaded
+        productRepository.save(onePlus7);
+
+    }
+
+
+
+
+
+
+
 
 
 }

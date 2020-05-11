@@ -4,9 +4,6 @@ import com.chiragbohet.ecommerce.Dtos.productapi.ProductAdminViewDto;
 import com.chiragbohet.ecommerce.Dtos.productapi.ProductDto;
 import com.chiragbohet.ecommerce.Dtos.productapi.ProductVariationDto;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
-import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataField;
-import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValues;
-import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValuesId;
 import com.chiragbohet.ecommerce.Entities.ProductRelated.Product;
 import com.chiragbohet.ecommerce.Entities.ProductRelated.ProductVariation;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
@@ -19,9 +16,7 @@ import com.chiragbohet.ecommerce.co.ProductCo;
 import com.chiragbohet.ecommerce.co.ProductUpdateCo;
 import com.chiragbohet.ecommerce.co.ProductVariationCo;
 import com.chiragbohet.ecommerce.co.ProductVariationUpdateCo;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,9 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.RefreshTokenReactiveOAuth2AuthorizedClientProvider;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.ls.LSOutput;
 
 import java.util.*;
 
@@ -59,6 +52,7 @@ public class ProductService {
 
     @Autowired
     EmailSenderService emailSenderService;
+
 
     public ResponseEntity addNewProduct(ProductCo co, String sellerEmail) {
 
@@ -106,41 +100,15 @@ public class ProductService {
         // TODO : Check isDeleted after adding auditing support, add proper image support
         if (!product.get().getIsActive())
             throw new GenericUserValidationFailedException("The product with ID : " + co.getProductId() + " is not yet Activated, please get it activated by Admin first.");
-
-        // validating metadata
-        Set<CategoryMetadataFieldValues> fieldValuesSet = product.get().getCategory().getFieldValuesSet();
-
-        Set<String> validFieldNames = new HashSet<>();
-
-        for (CategoryMetadataFieldValues fieldValue : fieldValuesSet)
-            validFieldNames.add(fieldValue.getCategoryMetadataField().getName());
-
-
-        for (Map.Entry<String, String> entry : co.getMetadata().entrySet()) {
-            // TODO : Improve this, not very optimized. PS : It ain't much but its honest work.
-
-            if (validFieldNames.contains(entry.getKey())) {
-                Set<String> validFieldValues = new HashSet<>();
-
-                for (CategoryMetadataFieldValues fieldValue : fieldValuesSet) {
-                    if (fieldValue.getCategoryMetadataField().getName().equals(entry.getKey()))
-                        validFieldValues.addAll(Arrays.asList(fieldValue.getValues().split(",")));
-                }
-
-                if (!validFieldValues.contains(entry.getValue()))
-                    throw new GenericUserValidationFailedException("Value : " + entry.getValue() + ", is not a valid value for Field : " + entry.getKey() + ".");
-
-            } else
-                throw new GenericUserValidationFailedException("Field : " + entry.getKey() + ", is not to be associated with any product with ID " + co.getProductId());
-
-        }
         log.info("Inside addNewProductVariation() - > about to map co to object using modelMapper");
 
         ProductVariation productVariation = modelMapper.map(co, ProductVariation.class);
         productVariation.setIsActive(true);
-        //productVariation.setProduct(product.get());
         product.get().addProductVariation(productVariation);    // changes
         log.info("Inside addNewProductVariation() - > mapped co to object, trying to persist");
+
+        // setter will validate and populate metadata fields
+        productVariation.setMetadata(co.getMetadata());
 
         //productVariationRepository.save(productVariation);
         productRepository.save(product.get());

@@ -17,6 +17,7 @@ import com.chiragbohet.ecommerce.Exceptions.UserAlreadyExistsException;
 import com.chiragbohet.ecommerce.Exceptions.UserNotFoundException;
 import com.chiragbohet.ecommerce.Repositories.ConfirmationTokenRepository;
 import com.chiragbohet.ecommerce.Repositories.CustomerRepository;
+import com.chiragbohet.ecommerce.Repositories.RoleRepository;
 import com.chiragbohet.ecommerce.Repositories.UserRepository;
 import com.chiragbohet.ecommerce.Utilities.ConfirmationToken;
 import com.chiragbohet.ecommerce.Utilities.EmailSenderService;
@@ -53,6 +54,9 @@ public class CustomerService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    RoleRepository roleRepository;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -274,6 +278,7 @@ public class CustomerService {
             throw new ConfirmPasswordNotMatchedException("Password and Confirm password don't match!");
         else
         {
+            customer.addRoles(roleRepository.findByAuthority("ROLE_CUSTOMER"));
             String encyptedPassword = passwordEncoder.encode(customer.getPassword());
             customer.setPassword(encyptedPassword);
             customerRepository.save(customer);   // persisting the Customer

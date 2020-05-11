@@ -36,14 +36,9 @@ public class Seller extends User {
 
     public Seller(){
 
-        List<Role> roles = new ArrayList<>();
-        Role ROLE_SELLER = new Role("ROLE_SELLER");
-        roles.add(ROLE_SELLER);
-
-        this.setRoleList(roles);
-
         this.setActive(false);  // will be activated by Admin
         this.setDeleted(false);
+
         // spring security related fields
         this.setAccountNonExpired(true);
         this.setAccountNonLocked(true);
@@ -54,6 +49,17 @@ public class Seller extends User {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Address address;
 
+    public void addAddress(Address address)
+    {
+        if(address != null)
+        {
+            if(this.address == null)
+            {
+                this.address = address;
+                address.setUser(this);
+            }
 
+        }
+    }
 
 }

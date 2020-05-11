@@ -15,6 +15,7 @@ import com.chiragbohet.ecommerce.Exceptions.ConfirmPasswordNotMatchedException;
 import com.chiragbohet.ecommerce.Exceptions.ResourceNotFoundException;
 import com.chiragbohet.ecommerce.Exceptions.UserAlreadyExistsException;
 import com.chiragbohet.ecommerce.Exceptions.UserNotFoundException;
+import com.chiragbohet.ecommerce.Repositories.RoleRepository;
 import com.chiragbohet.ecommerce.Repositories.SellerRepository;
 import com.chiragbohet.ecommerce.Repositories.UserRepository;
 import com.chiragbohet.ecommerce.Utilities.ConfirmationToken;
@@ -52,6 +53,9 @@ public class SellerService {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    RoleRepository roleRepository;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -96,7 +100,6 @@ public class SellerService {
     }
 
 
-
     public ResponseEntity getAllSellers(Optional<Integer> page, Optional<Integer> size, Optional<String> sortProperty, Optional<String> sortDirection) {
 
         Sort.Direction sortingDirection = sortDirection.get().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
@@ -126,6 +129,7 @@ public class SellerService {
             throw new UserAlreadyExistsException("Company already exists with the given name : " + seller.getCompanyName());
         else
             {
+                seller.addRoles(roleRepository.findByAuthority("ROLE_SELLER"));
                 String encyptedPassword = passwordEncoder.encode(seller.getPassword());
                 seller.setPassword(encyptedPassword);
                 sellerRepository.save(seller);

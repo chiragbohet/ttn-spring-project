@@ -55,7 +55,7 @@ public abstract class User {
     @Column(name = "IS_ENABLED")
     private boolean isEnabled;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "USER_ROLE", joinColumns = @JoinColumn(name = "ROLE_ID"), inverseJoinColumns = @JoinColumn(name = "USER_ID"))
     private List<Role> roleList;
 

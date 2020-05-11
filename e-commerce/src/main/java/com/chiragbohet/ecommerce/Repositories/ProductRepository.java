@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
@@ -23,5 +24,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // TODO : Filter products based on non deletion (soft delete)
     @Query(value = "SELECT * FROM PRODUCT WHERE CATEGORY_ID NOT IN (SELECT PARENT_ID FROM CATEGORY WHERE PARENT_ID IS NOT NULL)", nativeQuery = true)
     List<Product> getAllLeafNodeCategoryProducts(Pageable pageable);
+
+    Optional<Product> findByName(String name);
 
 }

@@ -1,6 +1,7 @@
 package com.chiragbohet.ecommerce.Entities.CategoryRelated;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -11,6 +12,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "CATEGORY_METADATA_FIELD")
 public class CategoryMetadataField {
 
@@ -38,6 +40,11 @@ public class CategoryMetadataField {
                 fieldValuesSet.add(value);
             }
         }
+    }
+
+    public CategoryMetadataField(String name)
+    {
+        this.name = name;
     }
 
 }

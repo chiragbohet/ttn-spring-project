@@ -34,7 +34,7 @@ public class Role implements GrantedAuthority {
         return authority;
     }
 
-    @ManyToMany(mappedBy = "roleList")
+    @ManyToMany(mappedBy = "roleList", fetch = FetchType.EAGER)
     List<User> userList;
 
     public void addUsers(User... users)
