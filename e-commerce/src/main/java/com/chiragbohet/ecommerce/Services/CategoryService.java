@@ -1,6 +1,5 @@
 package com.chiragbohet.ecommerce.Services;
 
-import com.chiragbohet.ecommerce.co.CategoryUpdateCo;
 import com.chiragbohet.ecommerce.Dtos.CategoryApi.CategoryViewDto;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataField;
@@ -16,6 +15,7 @@ import com.chiragbohet.ecommerce.Utilities.ObjectMapperUtils;
 import com.chiragbohet.ecommerce.co.CategoryCo;
 import com.chiragbohet.ecommerce.co.CategoryMetadataFieldCo;
 import com.chiragbohet.ecommerce.co.CategoryMetadataFieldValuesCo;
+import com.chiragbohet.ecommerce.co.CategoryUpdateCo;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,55 +46,92 @@ public class CategoryService {
     CategoryMetadataFieldValuesRepository categoryMetadataFieldValuesRepository;
 
     @Secured("ROLE_ADMIN")
-    public ResponseEntity addNewMetadataField(CategoryMetadataFieldCo co)
-    {
-        if(categoryMetadataFieldRepository.findByName(co.getName()) != null)
+    public ResponseEntity addNewMetadataField(CategoryMetadataFieldCo co) {
+        if (categoryMetadataFieldRepository.findByName(co.getName()) != null)
             throw new ResourceAlreadyExistsException("A metadata field already exists with name : " + co.getName());
 
         CategoryMetadataField categoryMetadataField = modelMapper.map(co, CategoryMetadataField.class);
         categoryMetadataFieldRepository.save(categoryMetadataField);
 
-        return new ResponseEntity<Long>(categoryMetadataField.getId(), null, HttpStatus.CREATED);
+        return new ResponseEntity<>(categoryMetadataField.getId(), null, HttpStatus.CREATED);
+    }
+
+    // checks name uniqueness within subtree of the parent category, performs a iterative dfs
+    public void checkCategoryNameUniquenessWithinSubtreeUtil(String newCategoryName, Category parentCategory) {
+        Set<Category> visitedSubcategories = new HashSet<>();
+        Stack<Category> categoryStack = new Stack<>();
+        categoryStack.push(parentCategory);
+
+        while (!categoryStack.empty()) {
+            Category currentCategory = categoryStack.pop(); // popping TOS
+
+            if (!visitedSubcategories.contains(currentCategory)) {
+                visitedSubcategories.add(currentCategory);
+                if (currentCategory.getName().equals(newCategoryName))
+                    throw new ResourceAlreadyExistsException("A category already exists with the name : " + newCategoryName + ", Within the sub categories of : " + parentCategory.getName());
+            }
+
+            // Pushing all non visited sub categories onto the stack
+            Set<Category> subCategories = currentCategory.getSubCategoriesSet();
+            for (Category category : subCategories) {
+                if (!visitedSubcategories.contains(category))
+                    categoryStack.push(category);
+            }
+
+        }
+    }
+
+    public void checkCategoryNameUniquenessAtTheRootLevelUtil(String newCategoryName) {
+        List<Category> rootLevelCategories = categoryRepository.getAllRootCategories();
+
+        for (Category category : rootLevelCategories) {
+            if (category.getName().equals(newCategoryName))
+                throw new ResourceAlreadyExistsException("A category already exists at the root level with name : " + newCategoryName);
+
+        }
+
     }
 
     @Secured("ROLE_ADMIN")
     public ResponseEntity addNewCategory(CategoryCo co) {
 
-        if(categoryRepository.findByName(co.getName()) != null)
-            throw new ResourceAlreadyExistsException("A category already exists with name : " + co.getName());
-
-        //TODO : Check uniqueness at rootlevel and at subtree
+        checkCategoryNameUniquenessAtTheRootLevelUtil(co.getName());
 
         Category newCategory = new Category();
-        newCategory.setName(co.getName());
-
         Optional<Category> parentCategory = null;
 
-        if(co.getParentId() != null)
-        {
-             parentCategory = categoryRepository.findById(co.getParentId());
+        if (co.getParentId() != null) {
+            parentCategory = categoryRepository.findById(co.getParentId());
 
-            if(!parentCategory.isPresent())
+            if (!parentCategory.isPresent())
                 throw new ResourceNotFoundException("No category found with id : " + co.getParentId());
+
+            // checking name uniqueness within the subtree
+            checkCategoryNameUniquenessWithinSubtreeUtil(co.getName(), parentCategory.get());
 
             newCategory.setParentCategory(parentCategory.get());
             parentCategory.get().addSubCategory(newCategory);
 
         }
 
+        newCategory.setName(co.getName());  // since no need to check name uniqueness within the subtree
+
         categoryRepository.save(newCategory);
 
-        return new ResponseEntity<Long>(newCategory.getId(),null,HttpStatus.CREATED);
+        return new ResponseEntity<Long>(newCategory.getId(), null, HttpStatus.CREATED);
     }
 
     public ResponseEntity updateCategory(CategoryUpdateCo co) {
 
         Optional<Category> category = categoryRepository.findById(co.getId());
 
-        if(!category.isPresent())
+        if (!category.isPresent())
             throw new ResourceNotFoundException("No category found with ID : " + co.getId());
 
-        //TODO : Check name uniqueness
+        checkCategoryNameUniquenessAtTheRootLevelUtil(co.getName());    // checking name uniqueness at root level
+
+        if (category.get().getParentCategory() != null)  //if parent category already exists
+            checkCategoryNameUniquenessWithinSubtreeUtil(co.getName(), category.get().getParentCategory()); // check name uniqueness withing the subtree
 
         // setting new name
         category.get().setName(co.getName());
