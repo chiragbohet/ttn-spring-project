@@ -46,11 +46,23 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
         authenticationManagerBuilder.authenticationProvider(authenticationProvider());
     }
 
+    private static final String[] SWAGGER_ENDPOINTS = {
+            "/v2/api-docs",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/webjars/**"
+    };
+
     @Override
     public void configure(final HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
+                .antMatchers(SWAGGER_ENDPOINTS).permitAll() // TODO : Should this be visible to Admin only?
                 .antMatchers("/register/*").anonymous()
+                .antMatchers("/v2/api-docs", "/swagger-ui.html").anonymous()
                 .antMatchers("/test/*").anonymous() // TODO : Remove this
                 .antMatchers("/admin/*").hasAnyRole("ADMIN")
                 .antMatchers("/customer/*").hasAnyRole("CUSTOMER")
