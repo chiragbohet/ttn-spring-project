@@ -1,6 +1,7 @@
 package com.chiragbohet.ecommerce.Services;
 
 import com.chiragbohet.ecommerce.Dtos.productapi.ProductAdminViewDto;
+import com.chiragbohet.ecommerce.Dtos.productapi.ProductCustomerViewDto;
 import com.chiragbohet.ecommerce.Dtos.productapi.ProductDto;
 import com.chiragbohet.ecommerce.Dtos.productapi.ProductVariationDto;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
@@ -26,7 +27,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -370,7 +372,7 @@ public class ProductService {
         if(requestedCategory.get().isLeafCategory())
         {
             log.trace("Inside getAllProductsForCustomer() -> valid leaf category");
-            products = productRepository.getAllProductsByCategoryId(requestedCategory.get().getId(), PageRequest.of(page.get(), size.get(), sortingDirection, sortProperty.get()));
+            products = productRepository.getAllProductsByLeafCategoryId(requestedCategory.get().getId(), PageRequest.of(page.get(), size.get(), sortingDirection, sortProperty.get()));
 
         }
         else
@@ -390,9 +392,29 @@ public class ProductService {
 
         Sort.Direction sortingDirection = sortDirection.get().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         // TODO : Return all non (soft) deleted products.
-        Page<Product> productList = productRepository.findAll(PageRequest.of(page.get(),size.get(),sortingDirection,sortProperty.get()));
-        List<ProductAdminViewDto> dtos = ObjectMapperUtils.mapAllPage (productList, ProductAdminViewDto.class);
+        Page<Product> productList = productRepository.findAll(PageRequest.of(page.get(), size.get(), sortingDirection, sortProperty.get()));
+        List<ProductAdminViewDto> dtos = ObjectMapperUtils.mapAllPage(productList, ProductAdminViewDto.class);
 
-        return new ResponseEntity<>(dtos,null,HttpStatus.OK);
+        return new ResponseEntity<>(dtos, null, HttpStatus.OK);
+    }
+
+    public ResponseEntity getSimilarProductsForCustomer(Long productId, Optional<Integer> page, Optional<Integer> size, Optional<String> sortDirection, Optional<String> sortProperty) {
+
+        Sort.Direction sortingDirection = sortDirection.get().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Optional<Product> product = productRepository.findById(productId);
+
+        if (!product.isPresent())
+            throw new ResourceNotFoundException("No product found with product ID : " + productId);
+
+        //TODO : Add a better matching criteria, rn returning list of products in the same category.
+        List<Product> similarProducts = productRepository.getAllActiveProductsByCategoryId(product.get().getCategory().getId(), PageRequest.of(page.get(), size.get(), sortingDirection, sortProperty.get()));
+
+        if (similarProducts.isEmpty())
+            throw new ResourceNotFoundException("No similar products found!");
+
+        List<ProductCustomerViewDto> dtoList = ObjectMapperUtils.mapAllList(similarProducts, ProductCustomerViewDto.class);
+
+        return new ResponseEntity<>(dtoList, null, HttpStatus.OK);
     }
 }

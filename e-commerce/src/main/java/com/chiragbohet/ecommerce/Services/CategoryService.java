@@ -67,7 +67,7 @@ public class CategoryService {
 
             if (!visitedSubcategories.contains(currentCategory)) {
                 visitedSubcategories.add(currentCategory);
-                if (currentCategory.getName().equals(newCategoryName))
+                if (currentCategory.getName().equalsIgnoreCase(newCategoryName))
                     throw new ResourceAlreadyExistsException("A category already exists with the name : " + newCategoryName + ", Within the sub categories of : " + parentCategory.getName());
             }
 
@@ -85,7 +85,7 @@ public class CategoryService {
         List<Category> rootLevelCategories = categoryRepository.getAllRootCategories();
 
         for (Category category : rootLevelCategories) {
-            if (category.getName().equals(newCategoryName))
+            if (category.getName().equalsIgnoreCase(newCategoryName))
                 throw new ResourceAlreadyExistsException("A category already exists at the root level with name : " + newCategoryName);
 
         }

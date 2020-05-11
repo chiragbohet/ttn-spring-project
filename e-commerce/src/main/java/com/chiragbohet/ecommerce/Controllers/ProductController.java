@@ -6,7 +6,6 @@ import com.chiragbohet.ecommerce.co.ProductCo;
 import com.chiragbohet.ecommerce.co.ProductUpdateCo;
 import com.chiragbohet.ecommerce.co.ProductVariationCo;
 import com.chiragbohet.ecommerce.co.ProductVariationUpdateCo;
-import jdk.nashorn.internal.objects.annotations.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -133,9 +132,18 @@ public class ProductController {
                                                 @RequestParam(value = "size", defaultValue = GlobalVariables.DEFAULT_PAGE_SIZE) Optional<Integer> size,
                                                 @RequestParam(value = "sort", defaultValue = GlobalVariables.DEFAULT_SORT_PROPERTY) Optional<String> sortProperty,
                                                 @RequestParam(value = "direction", defaultValue = GlobalVariables.DEFAULT_SORT_DIRECTION) Optional<String> sortDirection,
-                                                @PathVariable(value = "categoryId") Long categoryId)
-    {
+                                                @PathVariable(value = "categoryId") Long categoryId) {
         return productService.getAllProductsForCustomer(categoryId, page, size, sortDirection, sortProperty);
+    }
+
+    @Secured("ROLE_CUSTOMER")
+    @GetMapping("/customer/products/similar/{productId}")
+    public ResponseEntity getSimilarProductsForCustomer(@RequestParam(value = "page", defaultValue = GlobalVariables.DEFAULT_PAGE_OFFSET) Optional<Integer> page,
+                                                        @RequestParam(value = "size", defaultValue = GlobalVariables.DEFAULT_PAGE_SIZE) Optional<Integer> size,
+                                                        @RequestParam(value = "sort", defaultValue = GlobalVariables.DEFAULT_SORT_PROPERTY) Optional<String> sortProperty,
+                                                        @RequestParam(value = "direction", defaultValue = GlobalVariables.DEFAULT_SORT_DIRECTION) Optional<String> sortDirection,
+                                                        @PathVariable(value = "productId") Long productId) {
+        return productService.getSimilarProductsForCustomer(productId, page, size, sortDirection, sortProperty);
     }
 
 }
