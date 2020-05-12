@@ -1,8 +1,6 @@
 package com.chiragbohet.ecommerce.Utilities;
 
 import com.chiragbohet.ecommerce.Repositories.RoleRepository;
-import com.chiragbohet.ecommerce.Security.Role;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,10 +12,18 @@ public class GlobalVariables {
     @Autowired
     RoleRepository roleRepository;
 
+    // Paging Sorting related
+
     public static final String DEFAULT_PAGE_SIZE = "10";
     public static final String DEFAULT_PAGE_OFFSET = "0";
     public static final String DEFAULT_SORT_PROPERTY = "id";
     public static final String DEFAULT_SORT_DIRECTION = "asc";
+
+    // User Account locking related
+    public static Integer MAX_ATTEMPTS = 3;    // number of attempts after which a account will be locked
+
+    public static Long MINIMUM_TIME_BETWEEN_FAILED_ATTEMPTS_SECONDS = 60 * 10L; // Time in seconds within which if 3 wrong attempts are made account is locked
+
 
     // Regular expressions
 

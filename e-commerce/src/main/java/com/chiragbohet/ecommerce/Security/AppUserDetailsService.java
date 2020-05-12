@@ -26,8 +26,7 @@ public class AppUserDetailsService implements UserDetailsService {
         UserDetails requestedUser = userDao.loadUserByEmail(email);
 
         if (requestedUser != null) {
-            //System.out.println("Trying to authenticate user with email ::" + requestedUser.getUsername());
-            //System.out.println("Encrypted Password ::"+requestedUser.getPassword());
+
             if (!userRepository.findByEmail(email).isActive())
                 throw new RuntimeException("The account is not active, please get it activated first.");
 
