@@ -20,10 +20,14 @@ public class GlobalVariables {
     public static final String DEFAULT_SORT_DIRECTION = "asc";
 
     // User Account locking related
-    public static Integer MAX_ATTEMPTS = 3;    // number of attempts after which a account will be locked
+    public static final Integer MAX_ATTEMPTS = 3;    // number of attempts after which a account will be locked
 
-    public static Long MINIMUM_TIME_BETWEEN_FAILED_ATTEMPTS_SECONDS = 60 * 10L; // Time in seconds within which if 3 wrong attempts are made account is locked
+    public static final Long MINIMUM_TIME_BETWEEN_FAILED_ATTEMPTS_SECONDS = 60 * 10L; // Time in seconds within which if 3 wrong attempts are made account is locked
 
+    //TODO : This does not work, have to set it manually
+    public static final Long UNLOCK_ACCOUNTS_AFTER_MILLISECONDS = 10800000L;  // run the scheduler for unlocking locked accounts after this much time
+
+    public static final Long UNLOCK_ACCOUNTS_TIME_DIFFERENCE_HOURS = 3L;  // All locked accounts for these much hours will be unlocked.
 
     // Regular expressions
 

@@ -4,13 +4,18 @@ import com.chiragbohet.ecommerce.Entities.UserRelated.User;
 import com.chiragbohet.ecommerce.Repositories.LoginAttemptRepository;
 import com.chiragbohet.ecommerce.Repositories.UserRepository;
 import com.chiragbohet.ecommerce.Utilities.GlobalVariables;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+@Log4j2
+@EnableScheduling
 @Service
 public class LoginAttemptService {
 
@@ -68,6 +73,12 @@ public class LoginAttemptService {
             loginAttemptRepository.delete(previousFailedLoginAttempt.get());
         }
 
+    }
+
+    @Scheduled(fixedDelay = 10800000) // 3 hrs, TODO : Get this from global config
+    public void enableLockedAccounts() {
+        log.trace("Running scheduler to unlock locked accounts!");
+        loginAttemptRepository.deleteEntriesLockedForHours(GlobalVariables.UNLOCK_ACCOUNTS_TIME_DIFFERENCE_HOURS);
     }
 
 }
