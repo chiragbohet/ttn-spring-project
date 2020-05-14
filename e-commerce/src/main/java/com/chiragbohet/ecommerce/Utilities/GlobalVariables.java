@@ -20,14 +20,16 @@ public class GlobalVariables {
     public static final String DEFAULT_SORT_DIRECTION = "asc";
 
     // User Account locking related
+
     public static final Integer MAX_ATTEMPTS = 3;    // number of attempts after which a account will be locked
 
-    public static final Long MINIMUM_TIME_BETWEEN_FAILED_ATTEMPTS_SECONDS = 60 * 10L; // Time in seconds within which if 3 wrong attempts are made account is locked
+    public static final Long MINIMUM_TIME_BETWEEN_FAILED_ATTEMPTS_SECONDS = 60 * 10L; // If consecutive wrong credentials are entered within these seconds, account will be locked
 
-    //TODO : This does not work, have to set it manually
-    public static final Long UNLOCK_ACCOUNTS_AFTER_MILLISECONDS = 10800000L;  // run the scheduler for unlocking locked accounts after this much time
+    // Cannot be a non primitive, ref- https://stackoverflow.com/questions/2065937/how-to-supply-value-to-an-annotation-from-a-constant-java?rq=1
+    public static final long SCHEDULER_UNLOCKS_ACCOUNTS_AFTER_MILLISECONDS = 1 * 60 * 60 * 1000L;  //(1 hr) run the scheduler for unlocking locked accounts after this much time
 
-    public static final Long UNLOCK_ACCOUNTS_TIME_DIFFERENCE_HOURS = 3L;  // All locked accounts for these much hours will be unlocked.
+    public static final Long UNLOCK_ACCOUNTS_TIME_DIFFERENCE_SECONDS = 60 * 60 * 3L;  //(3hrs) All locked accounts for these much seconds will be unlocked.
+
 
     // Regular expressions
 
