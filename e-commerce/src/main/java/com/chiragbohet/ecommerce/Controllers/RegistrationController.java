@@ -24,6 +24,7 @@ public class RegistrationController {
     @Autowired
     SellerService sellerService;
 
+
     @ApiOperation("Register a new Customer")
     @PostMapping("/register/customer")
     ResponseEntity registerCustomer(@Valid @RequestBody CustomerRegistrationDto customerRegistrationDto){

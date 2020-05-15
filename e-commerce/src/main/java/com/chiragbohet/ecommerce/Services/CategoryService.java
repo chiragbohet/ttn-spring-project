@@ -1,16 +1,20 @@
 package com.chiragbohet.ecommerce.Services;
 
+import com.chiragbohet.ecommerce.Dtos.CategoryApi.CategoryFilteringDetailsDto;
 import com.chiragbohet.ecommerce.Dtos.CategoryApi.CategoryViewDto;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataField;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValues;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValuesId;
+import com.chiragbohet.ecommerce.Entities.ProductRelated.Product;
+import com.chiragbohet.ecommerce.Entities.ProductRelated.ProductVariation;
 import com.chiragbohet.ecommerce.Exceptions.GenericUserValidationFailedException;
 import com.chiragbohet.ecommerce.Exceptions.ResourceAlreadyExistsException;
 import com.chiragbohet.ecommerce.Exceptions.ResourceNotFoundException;
 import com.chiragbohet.ecommerce.Repositories.CategoryMetadataFieldRepository;
 import com.chiragbohet.ecommerce.Repositories.CategoryMetadataFieldValuesRepository;
 import com.chiragbohet.ecommerce.Repositories.CategoryRepository;
+import com.chiragbohet.ecommerce.Repositories.ProductRepository;
 import com.chiragbohet.ecommerce.Utilities.ObjectMapperUtils;
 import com.chiragbohet.ecommerce.co.CategoryCo;
 import com.chiragbohet.ecommerce.co.CategoryMetadataFieldCo;
@@ -27,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Log4j2
@@ -41,6 +46,9 @@ public class CategoryService {
 
     @Autowired
     CategoryRepository categoryRepository;
+
+    @Autowired
+    ProductRepository productRepository;
 
     @Autowired
     CategoryMetadataFieldValuesRepository categoryMetadataFieldValuesRepository;
@@ -278,20 +286,61 @@ public class CategoryService {
 
         log.info("inside : service -> getAllCategoriesForCustomer");
 
-        if(categoryId.isPresent())
-        {
+        if(categoryId.isPresent()) {
             log.info("inside : service -> if -> getAllCategoriesForCustomer");
             List<Category> immediateChildCategoryList = categoryRepository.getImmediateChildCategories(categoryId.get());
             List<CategoryViewDto> dtoList = ObjectMapperUtils.mapAllList(immediateChildCategoryList, CategoryViewDto.class);
             return new ResponseEntity<List<CategoryViewDto>>(dtoList, null, HttpStatus.OK);
+        } else {
+            log.info("inside : service -> else -> getAllCategoriesForCustomer");
+            List<Category> rootCategoryList = categoryRepository.getAllRootCategories();
+            List<CategoryViewDto> dtoList = ObjectMapperUtils.mapAllList(rootCategoryList, CategoryViewDto.class);
+            return new ResponseEntity<List<CategoryViewDto>>(dtoList, null, HttpStatus.OK);
         }
-        else
-         {
-              log.info("inside : service -> else -> getAllCategoriesForCustomer");
-              List<Category> rootCategoryList = categoryRepository.getAllRootCategories();
-              List<CategoryViewDto> dtoList = ObjectMapperUtils.mapAllList(rootCategoryList, CategoryViewDto.class);
-              return new ResponseEntity<List<CategoryViewDto>>(dtoList, null, HttpStatus.OK);
-         }
 
+    }
+
+    public ResponseEntity getCategoryFilteringDetailsForCustomer(Long categoryId) {
+
+        Optional<Category> category = categoryRepository.findById(categoryId);
+
+        if (!category.isPresent())
+            throw new ResourceNotFoundException("No category found with ID : " + categoryId);
+
+        CategoryFilteringDetailsDto dto = new CategoryFilteringDetailsDto();
+
+        Set<CategoryMetadataFieldValues> fieldValuesSet = category.get().getFieldValuesSet();
+        Map<String, String> fieldAndValueMap = new TreeMap<>();
+        for (CategoryMetadataFieldValues value : fieldValuesSet)
+            fieldAndValueMap.put(value.getCategoryMetadataField().getName(), value.getValues());
+
+        dto.setFieldAndValues(fieldAndValueMap);
+
+        List<Product> productList = productRepository.getAllActiveProductsByCategoryId(categoryId);
+
+
+        BigDecimal minPrice = new BigDecimal("999999999999999999999");
+        BigDecimal maxPrice = new BigDecimal("-1");
+
+        List<String> brandsList = new ArrayList<>();
+
+        for (Product product : productList) {
+            brandsList.add(product.getBrand());
+            Set<ProductVariation> productVariations = product.getProductVariationSet();
+
+            for (ProductVariation variation : productVariations) {
+                if (variation.getPrice().compareTo(minPrice) < 0)
+                    minPrice = variation.getPrice();
+
+                if (variation.getPrice().compareTo(maxPrice) > 0)
+                    maxPrice = variation.getPrice();
+            }
+
+        }
+        dto.setMaxPrice(maxPrice);
+        dto.setMinPrice(minPrice);
+        dto.setBrandsList(brandsList);
+
+        return new ResponseEntity<>(dto, null, HttpStatus.OK);
     }
 }

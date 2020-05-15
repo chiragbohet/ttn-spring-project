@@ -5,7 +5,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+@EnableJpaAuditing(auditorAwareRef = "auditorAware")
 @Configuration
 public class GlobalVariables {
 
@@ -54,16 +57,20 @@ public class GlobalVariables {
 
     public static final String ADMIN_EMAIL_ADDRESS = "bohet.chirag@gmail.com";
 
+    public static String getAdminEmailAddress() {   // TODO : Get admin email from db
+        return ADMIN_EMAIL_ADDRESS;
+    }
+
 
     @Bean
-    public ModelMapper modelMapper(){
+    public ModelMapper modelMapper() {
         return new ModelMapper();
     }
 
-
-    public static String getAdminEmailAddress()
-    {   // TODO : Get admin email from db
-        return ADMIN_EMAIL_ADDRESS;
+    @Bean
+    public AuditorAware<String> auditorAware() {
+        return new AuditorAwareImpl();
     }
+
 
 }

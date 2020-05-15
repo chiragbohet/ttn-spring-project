@@ -1,23 +1,24 @@
 package com.chiragbohet.ecommerce.Entities.ProductRelated;
 
-import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
-import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataField;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldValues;
 import com.chiragbohet.ecommerce.Exceptions.GenericUserValidationFailedException;
+import com.chiragbohet.ecommerce.Utilities.Auditable;
 import com.chiragbohet.ecommerce.Utilities.MetadataConverter;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.*;
 
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @Entity
 @Table(name = "PRODUCT_VARIATION")
-public class ProductVariation {
+public class ProductVariation extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,8 +49,7 @@ public class ProductVariation {
 
 
     // product must be set before this or will throw a null pointer exception
-    public void setMetadata(Map<String, String> userInputMetadata)
-    {
+    public void setMetadata(Map<String, String> userInputMetadata) {
         Set<CategoryMetadataFieldValues> categoryFieldnamesAndValues = this.product.category.getFieldValuesSet();
 
         Map<String,Set<String>> fieldNamesAndTheirValuesMap = new HashMap<>();
@@ -57,8 +57,7 @@ public class ProductVariation {
         // using a tree map so that all the product belonging to same category have a similar metadata structure
         this.metadata = new TreeMap<>();
 
-        for(CategoryMetadataFieldValues fieldValue : categoryFieldnamesAndValues)
-        {
+        for(CategoryMetadataFieldValues fieldValue : categoryFieldnamesAndValues) {
             String fieldName = fieldValue.getCategoryMetadataField().getName();
             Set<String> possibleValues = new HashSet<>(Arrays.asList(fieldValue.getValues().split(",")));
             fieldNamesAndTheirValuesMap.put(fieldName, possibleValues);
@@ -66,19 +65,16 @@ public class ProductVariation {
         }
 
 
-        for(Map.Entry<String,String> entry : userInputMetadata.entrySet())
-        {
+        for(Map.Entry<String,String> entry : userInputMetadata.entrySet()) {
             String userInputField = entry.getKey();
             String userInputValue = entry.getValue();
 
-            if(fieldNamesAndTheirValuesMap.containsKey(userInputField))
-            {
+            if(fieldNamesAndTheirValuesMap.containsKey(userInputField)) {
                 if(fieldNamesAndTheirValuesMap.get(userInputField).contains(userInputValue))
                     this.metadata.put(userInputField,userInputValue);
                 else
                     throw new GenericUserValidationFailedException("No value as : " + userInputValue + ", for the field : "+ userInputField + ". Please choose from one of these values : " + fieldNamesAndTheirValuesMap.get(userInputField).toString());
-            }
-            else
+            } else
                 throw new GenericUserValidationFailedException("No field with name : " + userInputField + ", associated with the category : " + this.product.getCategory().getName()+". Please choose fields within : " + fieldNamesAndTheirValuesMap.keySet().toString());
 
         }
@@ -86,17 +82,15 @@ public class ProductVariation {
     }
 
     public void setProduct(Product product){
-       if(product != null)
-       {
-           if(this.product == product)  // to prevent endless loop
-               return;
-           else if(this.product == null)
-           {
-               this.product = product;
-               product.addProductVariation(this);
-           }
+        if(product != null) {
+            if(this.product == product)  // to prevent endless loop
+                return;
+            else if(this.product == null) {
+                this.product = product;
+                product.addProductVariation(this);
+            }
 
-       }
+        }
     }
 
 }

@@ -6,9 +6,9 @@ import com.chiragbohet.ecommerce.Entities.CategoryRelated.CategoryMetadataFieldV
 import com.chiragbohet.ecommerce.Entities.ProductRelated.Product;
 import com.chiragbohet.ecommerce.Entities.ProductRelated.ProductVariation;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Address;
+import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
 import com.chiragbohet.ecommerce.Repositories.*;
-import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -18,7 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Log4j2
 @Component
@@ -315,8 +318,10 @@ public class Bootstrap implements ApplicationRunner {
 
     }
 
-    void addDummyProduct()
-    {   // One Plus 7
+    void addDummyProduct() {
+        Seller testSeller = sellerRepository.findByEmail("chirag.bohet@tothenew.com");
+
+        // One Plus 7
         Product onePlus7 = new Product();
         onePlus7.setName("One Plus 7");
         onePlus7.setBrand("One Plus");
@@ -325,8 +330,8 @@ public class Bootstrap implements ApplicationRunner {
         onePlus7.setIsReturnable(true);
         onePlus7.setIsCancellable(true);
         onePlus7.setCategory(categoryRepository.findByName("Mobiles"));
-        onePlus7.setSeller(sellerRepository.findByEmail("chirag.bohet@tothenew.com"));
-        productRepository.save(onePlus7);
+
+        //productRepository.save(onePlus7);
 
         // thinkpad laptop
         Product thinkpad = new Product();
@@ -337,8 +342,13 @@ public class Bootstrap implements ApplicationRunner {
         thinkpad.setIsCancellable(true);
         thinkpad.setIsCancellable(true);
         thinkpad.setCategory(categoryRepository.findByName("Laptops"));
-        thinkpad.setSeller(sellerRepository.findByEmail("chirag.bohet@tothenew.com"));
-        productRepository.save(thinkpad);
+        //thinkpad.setSeller(sellerRepository.findByEmail("chirag.bohet@tothenew.com"));
+        //productRepository.save(thinkpad);
+        //sellerRepository.save(sellerRepository.findByEmail("chirag.bohet@tothenew.com"));
+
+        testSeller.addProduct(onePlus7, thinkpad);
+        sellerRepository.save(testSeller);
+
     }
 
     void addDummyProductVariation(){

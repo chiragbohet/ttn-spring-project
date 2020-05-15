@@ -4,6 +4,8 @@ import com.chiragbohet.ecommerce.Services.CustomerService;
 import com.chiragbohet.ecommerce.Services.SellerService;
 import com.chiragbohet.ecommerce.Utilities.GlobalVariables;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,9 @@ public class AdminController {
     @Autowired
     SellerService sellerService;
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Get a list of all registered Customers")
     @GetMapping("/admin/customer")
     ResponseEntity getAllCustomers(@RequestParam(value = "page", defaultValue = GlobalVariables.DEFAULT_PAGE_OFFSET) Optional<Integer> page,
@@ -32,6 +37,9 @@ public class AdminController {
 
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Get a list of all registered Sellers")
     @GetMapping("/admin/seller")
     ResponseEntity getAllSellers(@RequestParam(value = "page", defaultValue = GlobalVariables.DEFAULT_PAGE_OFFSET) Optional<Integer> page,
@@ -43,24 +51,36 @@ public class AdminController {
 
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Activate a customer")
     @PatchMapping("admin/customer/activate/{id}")
     ResponseEntity activateCustomer(@PathVariable Long id) {
         return customerService.activateCustomer(id);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Deactivate a customer")
     @PatchMapping("admin/customer/deactivate/{id}")
     ResponseEntity deactivateCustomer(@PathVariable Long id) {
         return customerService.deactivateCustomer(id);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Activate a seller")
     @PatchMapping("admin/seller/activate/{id}")
     ResponseEntity activateSeller(@PathVariable Long id) {
         return sellerService.activateSeller(id);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Deactivate a seller")
     @PatchMapping("admin/seller/deactivate/{id}")
     ResponseEntity deactivateSeller(@PathVariable Long id) {

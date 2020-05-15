@@ -2,21 +2,24 @@ package com.chiragbohet.ecommerce.Entities.ProductRelated;
 
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
+import com.chiragbohet.ecommerce.Utilities.Auditable;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @Entity
 @ToString
 @Table(name = "PRODUCT")
-public class Product {
+public class Product extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,32 +48,39 @@ public class Product {
     @JoinColumn(name = "CATEGORY_ID")
     Category category;
 
-    @ManyToOne
+    @Setter(AccessLevel.NONE)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "SELLER_ID")
     Seller seller;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     Set<ProductVariation> productVariationSet;
 
-    public Product()
-    {
+    public Product() {
         this.isCancellable = false;
         this.isReturnable = false;
         this.isActive = false;
     }
 
-    public void addProductVariation(ProductVariation... productVariations)
-    {
-        if(productVariations != null)
-        {
+    public void addProductVariation(ProductVariation... productVariations) {
+        if(productVariations != null) {
             if(productVariationSet == null)
                 productVariationSet = new HashSet<>();
 
-            for(ProductVariation productVariation : productVariations)
-            {
+            for (ProductVariation productVariation : productVariations) {
                 productVariation.setProduct(this);
                 productVariationSet.add(productVariation);
             }
+        }
+    }
+
+    public void setSeller(Seller seller) {
+        if (seller != null) {
+            if (this.seller == seller)   // prevent infinite loop
+                return;
+
+            this.seller = seller;
+            seller.addProduct(this);
         }
     }
 

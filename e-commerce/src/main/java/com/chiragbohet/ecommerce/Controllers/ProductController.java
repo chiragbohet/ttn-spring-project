@@ -7,6 +7,8 @@ import com.chiragbohet.ecommerce.co.ProductUpdateCo;
 import com.chiragbohet.ecommerce.co.ProductVariationCo;
 import com.chiragbohet.ecommerce.co.ProductVariationUpdateCo;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,9 @@ public class ProductController {
     @Autowired
     ProductService productService;
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Add new Product")
     @Secured("ROLE_SELLER")
     @PostMapping("/seller/products")
@@ -31,6 +36,9 @@ public class ProductController {
         return productService.addNewProduct(co, principal.getName());
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Add new Product Variations")
     @Secured("ROLE_SELLER")
     @PostMapping("/seller/product-variations")
@@ -38,6 +46,9 @@ public class ProductController {
         return productService.addNewProductVariation(co);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Get Product Details")
     @Secured("ROLE_SELLER")
     @GetMapping("/seller/products/{id}")
@@ -45,6 +56,9 @@ public class ProductController {
         return productService.getSellerProduct(principal.getName(), productId);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Get Product Variation Details")
     @Secured("ROLE_SELLER")
     @GetMapping("/seller/product-variations/{id}")
@@ -52,6 +66,9 @@ public class ProductController {
         return productService.getSellerProductVariation(principal.getName(), productVariationId);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Get a list of all Products by Seller")
     @Secured("ROLE_SELLER")
     @GetMapping("/seller/products")
@@ -63,6 +80,9 @@ public class ProductController {
         return productService.getAllSellerProducts(page, size, sortProperty, sortDirection, principal.getName());
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Get a list of all Variations of a Product by Seller")
     @Secured("ROLE_SELLER")
     @GetMapping("/seller/products/{productid}/product-variations")
@@ -75,6 +95,9 @@ public class ProductController {
         return productService.getAllVariationsOfAProductBySeller(page, size, sortProperty, sortDirection, principal.getName(), productId);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Delete a Product")
     @Secured("ROLE_SELLER")
     @DeleteMapping("/seller/products/{productId}")
@@ -82,6 +105,9 @@ public class ProductController {
         return productService.deleteProductForSeller(principal.getName(), productId);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Update a Product")
     @Secured("ROLE_SELLER")
     @PutMapping("/seller/products/{productId}")
@@ -90,6 +116,9 @@ public class ProductController {
 
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Update a Product Variation")
     @Secured("ROLE_SELLER")
     @PutMapping("/seller/product-variations/{productVariationId}")
@@ -97,6 +126,9 @@ public class ProductController {
         return productService.updateProductVariationForSeller(principal.getName(), productVariationId, co);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Get Product details for Admin")
     @Secured("ROLE_ADMIN")
     @GetMapping("/admin/products/{productId}")
@@ -104,6 +136,9 @@ public class ProductController {
         return productService.getProductForAdmin(productId);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Get a list of Products for Admin")
     @Secured("ROLE_ADMIN")
     @GetMapping("/admin/products")
@@ -115,6 +150,9 @@ public class ProductController {
     }
 
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Deactivate a Product")
     @Secured("ROLE_ADMIN")
     @PutMapping("/admin/deactivate/products/{productId}")
@@ -122,6 +160,9 @@ public class ProductController {
         return productService.deactivateProductForAdmin(productId);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Activate a Product")
     @Secured("ROLE_ADMIN")
     @PutMapping("/admin/activate/products/{productId}")
@@ -129,6 +170,9 @@ public class ProductController {
         return productService.activateProductForAdmin(productId);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Get details of a Product for Customer")
     @Secured("ROLE_CUSTOMER")
     @GetMapping("/customer/products/{productId}")
@@ -137,6 +181,9 @@ public class ProductController {
     }
 
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Get all Products in a Category for a Customer")
     @Secured("ROLE_CUSTOMER")
     @GetMapping("/customer/products/categories/{categoryId}")
@@ -148,6 +195,9 @@ public class ProductController {
         return productService.getAllProductsForCustomer(categoryId, page, size, sortDirection, sortProperty);
     }
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "Authorization token",
+                    required = true, dataType = "string", paramType = "header")})
     @ApiOperation("Get similar Products for a Customer")
     @Secured("ROLE_CUSTOMER")
     @GetMapping("/customer/products/similar/{productId}")

@@ -1,7 +1,7 @@
 package com.chiragbohet.ecommerce.Services;
 
-import com.chiragbohet.ecommerce.Dtos.AdminApi.CustomerAdminApiDto;
 import com.chiragbohet.ecommerce.Dtos.AddressViewDto;
+import com.chiragbohet.ecommerce.Dtos.AdminApi.CustomerAdminApiDto;
 import com.chiragbohet.ecommerce.Dtos.CustomerApi.CustomerDetailsDto;
 import com.chiragbohet.ecommerce.Dtos.CustomerApi.CustomerProfileUpdateDto;
 import com.chiragbohet.ecommerce.Dtos.NewAddressDto;
@@ -35,7 +35,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class CustomerService {
@@ -80,21 +83,23 @@ public class CustomerService {
         return new ResponseEntity<CustomerDetailsDto>(customerDetailsDto,null,HttpStatus.OK);
     }
 
+    @Transactional
     public ResponseEntity activateCustomer(Long id){
-        //TODO : Delete customer activation token
+
+
         Optional<Customer> customer = customerRepository.findById(id);
 
-        if(customer.isPresent())
-        {
-            if(!customer.get().isActive())
-            {
+        if(customer.isPresent()) {
+            if(!customer.get().isActive()) {
+                //Delete customer activation token, if any
+                confirmationTokenRepository.deleteByUserId(id);
+
                 customer.get().setActive(true);
                 customerRepository.save(customer.get());
                 emailSenderService.sendEmail(emailSenderService.getCustomerRegistrationCompletedMail(customer.get().getEmail()));
             }
-                return new ResponseEntity<String>("customer account with id : " + id + " activated.",null,HttpStatus.OK);
-        }
-        else
+            return new ResponseEntity<String>("customer account with id : " + id + " activated.",null,HttpStatus.OK);
+        } else
             throw new UserNotFoundException("No user found with id : " + id);
 
 
@@ -143,7 +148,7 @@ public class CustomerService {
 
         ConfirmationToken foundToken = confirmationTokenRepository.findByConfirmationToken(userToken);
 
-        // TODO : add token expiration mechanism
+
         if(foundToken != null)
         {
             if(foundToken.isExpired())
@@ -272,6 +277,7 @@ public class CustomerService {
     public ResponseEntity registerNewCustomer(CustomerRegistrationDto customerRegistrationDto) throws UserAlreadyExistsException {
 
         Customer customer = modelMapper.map(customerRegistrationDto, Customer.class);   // converting DTO to POJO
+
         if(customerRepository.findByEmail(customer.getEmail()) != null) // User already exists with given email
             throw new UserAlreadyExistsException("User already exists with email : " + customer.getEmail());
         else if(!customerRegistrationDto.getPassword().equals(customerRegistrationDto.getConfirmPassword()))
@@ -311,7 +317,6 @@ public class CustomerService {
         else
             {
                 confirmationTokenRepository.delete(confirmationTokenRepository.findByUser(customer));
-
                 createCustomerActivationTokenAndSendEmail(customer);
                 return new ResponseEntity<String>("Please check your email for new registration link!",null,HttpStatus.OK);
             }

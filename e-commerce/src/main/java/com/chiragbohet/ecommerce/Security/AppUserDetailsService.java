@@ -1,5 +1,6 @@
 package com.chiragbohet.ecommerce.Security;
 
+import com.chiragbohet.ecommerce.Entities.UserRelated.User;
 import com.chiragbohet.ecommerce.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,10 +28,16 @@ public class AppUserDetailsService implements UserDetailsService {
 
         if (requestedUser != null) {
 
-            if (!userRepository.findByEmail(email).isActive())
+            User user = userRepository.findByEmail(email);
+
+            if (!user.isActive())
                 throw new RuntimeException("The account is not active, please get it activated first.");
 
+            if (user.isDeleted())
+                throw new RuntimeException("The account is Deleted.");
+
             return requestedUser;
+
         } else {
             throw new UsernameNotFoundException("No user found with email : " + email);
         }

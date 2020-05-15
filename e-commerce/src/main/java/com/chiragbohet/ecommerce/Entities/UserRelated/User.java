@@ -2,18 +2,22 @@ package com.chiragbohet.ecommerce.Entities.UserRelated;
 
 
 import com.chiragbohet.ecommerce.Security.Role;
+import com.chiragbohet.ecommerce.Utilities.Auditable;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "USER")
-public abstract class User {
+public abstract class User extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,17 +63,13 @@ public abstract class User {
     @JoinTable(name = "USER_ROLE", joinColumns = @JoinColumn(name = "ROLE_ID"), inverseJoinColumns = @JoinColumn(name = "USER_ID"))
     private List<Role> roleList;
 
-    public void addRoles(Role... roleArray)
-    {
-        if(roleArray != null)
-        {
+    public void addRoles(Role... roleArray) {
+        if(roleArray != null) {
             if(roleList == null)
                 roleList = new ArrayList<>();
 
-            for(Role role : roleArray)
-            {
-                if(!roleList.contains(role))
-                {
+            for(Role role : roleArray) {
+                if(!roleList.contains(role)) {
                     roleList.add(role);
                     role.addUsers(this);
 

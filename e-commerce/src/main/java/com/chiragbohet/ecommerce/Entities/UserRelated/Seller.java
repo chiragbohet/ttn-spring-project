@@ -1,16 +1,11 @@
 package com.chiragbohet.ecommerce.Entities.UserRelated;
 
 import com.chiragbohet.ecommerce.Entities.ProductRelated.Product;
-import com.chiragbohet.ecommerce.Security.Role;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -51,14 +46,27 @@ public class Seller extends User {
 
     public void addAddress(Address address)
     {
-        if(address != null)
-        {
-            if(this.address == null)
-            {
+        if(address != null) {
+            if (this.address == null) {
                 this.address = address;
                 address.setUser(this);
             }
 
+        }
+    }
+
+    public void addProduct(Product... products) {
+        if (products != null) {
+            if (productSet == null)
+                productSet = new HashSet<>();
+
+            for (Product product : products) {
+                if (!productSet.contains(product)) {
+                    productSet.add(product);
+                    product.setSeller(this);
+
+                }
+            }
         }
     }
 
