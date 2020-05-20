@@ -1,15 +1,18 @@
 package com.chiragbohet.ecommerce.Entities.UserRelated;
 
+import com.chiragbohet.ecommerce.Utilities.Auditable;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @Entity
 @Table(name = "ADDRESS")
-public class Address {
+public class Address extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +33,9 @@ public class Address {
 
     @Column(name = "ZIP_CODE")
     String zipCode;
+
+    @Column(name = "IS_DELETED")
+    Boolean isDeleted;
 
     // ex - office/home
     @Column(name = "LABEL")

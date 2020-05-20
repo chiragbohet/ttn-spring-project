@@ -274,6 +274,7 @@ public class CategoryService {
 
     }
 
+    //TODO : Test this
     public ResponseEntity getAllCategoriesForSeller() {
 
         List<Category> leafCategories = categoryRepository.getAllLeafCategories();

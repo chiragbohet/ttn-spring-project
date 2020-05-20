@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Portal</title>
+
+    <!-- this is not working, for the time using internal css
+    <link rel="stylesheet" type="text/css" th:href="@{/static/css/style.css}">
+    -->
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto Slab', sans-serif;
+        }
+
+        #main-container {
+            width: 100%;
+        }
+
+        #user-stats-table {
+            text-align: left;
+        }
+
+        tr, th, td, table {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+    </style>
+
+</head>
+<body>
+<div id="main-container">
+    <header>
+        <h3 th:text="'Hello, ' + ${adminEmail}"></h3>
+    </header>
+
+    <!-- user stats-->
+    <br>
+    <br>
+    <section id="user-stats-table">
+        <table>
+            <caption><h3>User related stats</h3></caption>
+            <tr>
+                <th>Type</th>
+                <th>Count</th>
+            </tr>
+            <tr>
+                <th>Sellers</th>
+                <td th:text="${sellersCount}"></td>
+            </tr>
+            <tr>
+                <th>Customers</th>
+                <td th:text="${customersCount}"></td>
+            </tr>
+        </table>
+    </section>
+
+    <!-- category stats -->
+    <br>
+    <br>
+    <section>
+        <table>
+            <caption><h3>Category related stats</h3></caption>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Product Count</th>
+            </tr>
+            <tr th:each="category : ${categoryList}">
+                <td th:text="${category[0]}"></td>
+                <td th:text="${category[1]}"></td>
+                <td th:text="${category[2]}"></td>
+            </tr>
+
+        </table>
+    </section>
+
+    <!-- product stock stats -->
+    <br>
+    <br>
+    <section>
+        <table>
+            <caption><h3>Product stock information</h3></caption>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Stock</th>
+            </tr>
+            <tr th:each="product : ${productList}">
+                <td th:text="${product[0]}"></td>
+                <td th:text="${product[1]}"></td>
+                <td th:text="${product[2]}"></td>
+            </tr>
+
+        </table>
+    </section>
+
+    <footer>
+
+    </footer>
+</div>
+</body>
+</html>

@@ -63,7 +63,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers(SWAGGER_ENDPOINTS).permitAll() // TODO : Should this be visible to Admin only?
                 .antMatchers("/register/*").anonymous()
                 .antMatchers("/v2/api-docs", "/swagger-ui.html").anonymous()
-                .antMatchers("/test/*").anonymous() // TODO : Remove this
+                .antMatchers("/test/**").anonymous() // TODO : Remove this
                 .antMatchers("/admin/*").hasAnyRole("ADMIN")
                 .antMatchers("/customer/*").hasAnyRole("CUSTOMER")
                 .antMatchers("/seller/*").hasAnyRole("SELLER")

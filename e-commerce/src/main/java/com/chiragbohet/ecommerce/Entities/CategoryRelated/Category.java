@@ -27,6 +27,9 @@ public class Category extends Auditable {
     @Column(name = "NAME")
     String name;
 
+    @Column(name = "IS_DELETED")
+    Boolean isDeleted;
+
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "PARENT_ID")
     Category parentCategory;

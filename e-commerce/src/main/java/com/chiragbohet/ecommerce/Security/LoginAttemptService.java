@@ -7,7 +7,6 @@ import com.chiragbohet.ecommerce.Utilities.EmailSenderService;
 import com.chiragbohet.ecommerce.Utilities.GlobalVariables;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,7 +14,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Log4j2
-@EnableScheduling
 @Service
 public class LoginAttemptService {
 

@@ -329,9 +329,22 @@ public class Bootstrap implements ApplicationRunner {
         onePlus7.setIsActive(true);
         onePlus7.setIsReturnable(true);
         onePlus7.setIsCancellable(true);
+        onePlus7.setIsDeleted(false);
         onePlus7.setCategory(categoryRepository.findByName("Mobiles"));
-
         //productRepository.save(onePlus7);
+
+
+        // Xiaomi Mi A2
+        Product miA2 = new Product();
+        miA2.setName("Mi A2");
+        miA2.setBrand("Xiaomi");
+        miA2.setDescription("Android Smartphone");
+        miA2.setIsActive(true);
+        miA2.setIsReturnable(true);
+        miA2.setIsCancellable(true);
+        miA2.setIsDeleted(false);
+        miA2.setCategory(categoryRepository.findByName("Mobiles"));
+
 
         // thinkpad laptop
         Product thinkpad = new Product();
@@ -341,12 +354,14 @@ public class Bootstrap implements ApplicationRunner {
         thinkpad.setIsActive(true);
         thinkpad.setIsCancellable(true);
         thinkpad.setIsCancellable(true);
+        thinkpad.setIsDeleted(false);
         thinkpad.setCategory(categoryRepository.findByName("Laptops"));
         //thinkpad.setSeller(sellerRepository.findByEmail("chirag.bohet@tothenew.com"));
         //productRepository.save(thinkpad);
         //sellerRepository.save(sellerRepository.findByEmail("chirag.bohet@tothenew.com"));
 
-        testSeller.addProduct(onePlus7, thinkpad);
+
+        testSeller.addProduct(onePlus7, thinkpad, miA2);
         sellerRepository.save(testSeller);
 
     }

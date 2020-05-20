@@ -14,4 +14,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "UPDATE USER SET IS_ENABLED = TRUE WHERE EMAIL = :userEmail", nativeQuery = true)
     void enableAccountsByEmail(@Param("userEmail") String userEmail);
 
+    @Query(value = "SELECT COUNT(*) FROM USER WHERE NOT IS_DELETED AND ID IN (SELECT ID FROM CUSTOMER)", nativeQuery = true)
+    Long getNonDeletedCustomersCount();
+
+    @Query(value = "SELECT COUNT(*) FROM USER WHERE NOT IS_DELETED AND ID IN (SELECT ID FROM SELLER)", nativeQuery = true)
+    Long getNonDeletedSellersCount();
+
 }

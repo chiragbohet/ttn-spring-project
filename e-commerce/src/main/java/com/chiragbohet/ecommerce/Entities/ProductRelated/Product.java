@@ -53,6 +53,9 @@ public class Product extends Auditable {
     @JoinColumn(name = "SELLER_ID")
     Seller seller;
 
+    @Column(name = "IS_DELETED")
+    Boolean isDeleted;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     Set<ProductVariation> productVariationSet;
 
