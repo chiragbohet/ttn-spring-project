@@ -1,6 +1,7 @@
 package com.chiragbohet.ecommerce.Services;
 
 import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
+import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
 import com.chiragbohet.ecommerce.Entities.UserRelated.User;
 import com.chiragbohet.ecommerce.Repositories.CategoryRepository;
 import com.chiragbohet.ecommerce.Repositories.ProductRepository;
@@ -47,7 +48,7 @@ public class ViewService {
 
         //adding customer and seller count
         modelAndView.addObject("customersCount", getNonDeletedCustomersCountByCriteriaQuery().toString());
-        modelAndView.addObject("sellersCount", userRepository.getNonDeletedSellersCount().toString());
+        modelAndView.addObject("sellersCount", getNonDeletedSellersCountByCriteriaQuery().toString());
 
         // adding category details
         List<Object[]> categoriesWithProductCount = categoryRepository.getLeafCategoryListWithProductCount();
@@ -62,7 +63,8 @@ public class ViewService {
 
     }
 
-    private Long getNonDeletedCustomersCountByCriteriaQuery() {
+    public Long getNonDeletedCustomersCountByCriteriaQuery() {
+
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
 
@@ -80,10 +82,28 @@ public class ViewService {
 
         TypedQuery<Long> query = entityManager.createQuery(criteriaQuery);
 
-        Long result = query.getSingleResult();
+        return query.getSingleResult();
 
-        return result;
     }
 
+    public Long getNonDeletedSellersCountByCriteriaQuery() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+
+        // Subquery to get list of seller IDs'
+        // Ref : https://www.baeldung.com/jpa-criteria-api-in-expressions
+        Subquery<Seller> subquery = criteriaQuery.subquery(Seller.class);
+        Root<Seller> sellerRoot = subquery.from(Seller.class);
+        subquery.select(sellerRoot.get("id"));
+
+        //SELECT COUNT(*) FROM USER WHERE NOT IS_DELETED AND ID IN (SELECT ID FROM SELLER)
+        Root<User> userRoot = criteriaQuery.from(User.class);
+        criteriaQuery.select(criteriaBuilder.count(userRoot));
+        criteriaQuery.where(criteriaBuilder.and(criteriaBuilder.isFalse(userRoot.get("isDeleted"))), criteriaBuilder.in(userRoot.get("id")).value(subquery));
+
+        TypedQuery<Long> query = entityManager.createQuery(criteriaQuery);
+
+        return query.getSingleResult();
+    }
 
 }
