@@ -48,6 +48,23 @@ dependencies {
 	compile group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf', version: '2.2.7.RELEASE'
 
 
+	// Hibernate Metamodel Generator
+	// Ref : https://stackoverflow.com/questions/54218556/how-to-generate-jpa-metamodel-with-gradle-5-x
+	annotationProcessor('org.hibernate:hibernate-jpamodelgen:6.0.0.Alpha5')
+
+	tasks.withType(JavaCompile) {
+		options.annotationProcessorGeneratedSourcesDirectory = file("src/generated/java")
+	}
+
+
+	sourceSets {
+		generated {
+			java {
+				srcDirs = ['src/generated/java']
+			}
+		}
+	}
+
 }
 
 test {

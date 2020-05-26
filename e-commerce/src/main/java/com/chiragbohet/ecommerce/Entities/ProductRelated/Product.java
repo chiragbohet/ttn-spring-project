@@ -87,5 +87,15 @@ public class Product extends Auditable {
         }
     }
 
+    public void setCategory(Category category) {
+        if (category != null) {
+            if (category == this.category)
+                return;
+
+            this.category = category;
+            category.addProduct(this);
+
+        }
+    }
 
 }

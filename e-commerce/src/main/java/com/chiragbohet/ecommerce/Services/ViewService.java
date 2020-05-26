@@ -1,5 +1,8 @@
 package com.chiragbohet.ecommerce.Services;
 
+import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
+import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category_;
+import com.chiragbohet.ecommerce.Entities.ProductRelated.Product;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
 import com.chiragbohet.ecommerce.Entities.UserRelated.User;
@@ -14,10 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
+import javax.persistence.criteria.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class ViewService {
         modelAndView.addObject("sellersCount", getNonDeletedSellersCountByCriteriaQuery().toString());
 
         // adding category details
-        List<Object[]> categoriesWithProductCount = categoryRepository.getLeafCategoryListWithProductCount();
+        List<Object[]> categoriesWithProductCount = getLeafCategoryListWithProductCountByCriteriaQuery();
         modelAndView.addObject("categoryList", categoriesWithProductCount);
 
         //adding product details
@@ -104,6 +104,27 @@ public class ViewService {
         TypedQuery<Long> query = entityManager.createQuery(criteriaQuery);
 
         return query.getSingleResult();
+    }
+
+    public List<Object[]> getLeafCategoryListWithProductCountByCriteriaQuery() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
+
+        Root<Category> categoryRoot = criteriaQuery.from(Category.class);
+        Join<Category, Product> categoryProductJoin = categoryRoot.join(Category_.productSet, JoinType.LEFT);
+
+        // subquery
+        Subquery<Category> subquery = criteriaQuery.subquery(Category.class);
+        Root<Category> subQueryCategoryRoot = subquery.from(Category.class);
+        subquery.select(subQueryCategoryRoot.get("parentCategory")).distinct(true);
+        subquery.where(criteriaBuilder.isNotNull(subQueryCategoryRoot.get("parentCategory")));
+
+        criteriaQuery.multiselect(categoryRoot.get(Category_.id), categoryRoot.get(Category_.name), criteriaBuilder.count(categoryProductJoin));
+        criteriaQuery.where(criteriaBuilder.not(criteriaBuilder.in(categoryRoot.get("id")).value(subquery)));   // TODO : idk why I cant use metamodel Category_.id here
+        criteriaQuery.groupBy(categoryRoot.get(Category_.id));
+
+        TypedQuery<Object[]> query = entityManager.createQuery(criteriaQuery);
+        return query.getResultList();
     }
 
 }

@@ -1,8 +1,10 @@
 package com.chiragbohet.ecommerce.Entities.CategoryRelated;
 
+import com.chiragbohet.ecommerce.Entities.ProductRelated.Product;
 import com.chiragbohet.ecommerce.Utilities.Auditable;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -16,6 +18,7 @@ import java.util.Set;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@NoArgsConstructor
 @Table(name = "CATEGORY")
 public class Category extends Auditable {
 
@@ -29,6 +32,9 @@ public class Category extends Auditable {
 
     @Column(name = "IS_DELETED")
     Boolean isDeleted;
+
+    @OneToMany(mappedBy = "category", fetch = FetchType.EAGER)
+    Set<Product> productSet;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "PARENT_ID")
@@ -65,11 +71,26 @@ public class Category extends Auditable {
         }
     }
 
-    public boolean isLeafCategory(){
+    public void addProduct(Product... products) {
+        if (products != null) {
+            if (productSet == null)
+                productSet = new HashSet<>();
+
+            for (Product product : products) {
+                if (!productSet.contains(product)) {
+                    productSet.add(product);
+                    product.setCategory(this);
+                }
+            }
+
+        }
+    }
+
+    public boolean isLeafCategory() {
         return subCategoriesSet == null;
     }
 
-    public boolean isRootCategory(){
+    public boolean isRootCategory() {
         return parentCategory == null;
     }
 
