@@ -3,6 +3,7 @@ package com.chiragbohet.ecommerce;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category_;
 import com.chiragbohet.ecommerce.Entities.ProductRelated.Product;
+import com.chiragbohet.ecommerce.Entities.ProductRelated.ProductVariation;
 import com.chiragbohet.ecommerce.Entities.ProductRelated.Product_;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
 import com.chiragbohet.ecommerce.Entities.UserRelated.User;
@@ -139,6 +140,36 @@ class SpringSecurityApplicationTests {
 
         for (Product product : mobiles.getProductSet()) {
             System.out.println(product.getName());
+        }
+
+    }
+    //SELECT PRODUCT.ID, PRODUCT.NAME, SUM(PRODUCT_VARIATION.QUANTITY_AVAILABLE)
+    // FROM PRODUCT LEFT JOIN PRODUCT_VARIATION ON PRODUCT.ID = PRODUCT_VARIATION.PRODUCT_ID
+    // WHERE NOT PRODUCT.IS_DELETED AND PRODUCT.IS_ACTIVE GROUP BY PRODUCT.ID
+
+    @Test
+    void again() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
+
+        Root<Product> productRoot = criteriaQuery.from(Product.class);
+
+        Join<Product, ProductVariation> productProductVariationJoin = productRoot.join(Product_.productVariationSet, JoinType.LEFT);
+
+        criteriaQuery.multiselect(productRoot.get(Product_.id), productRoot.get(Product_.name), criteriaBuilder.sum(productProductVariationJoin.get("quantityAvailable")));
+        criteriaQuery.where(criteriaBuilder.and(criteriaBuilder.isFalse(productRoot.get(Product_.isDeleted))), criteriaBuilder.isTrue(productRoot.get(Product_.isActive)));
+        criteriaQuery.groupBy(productRoot.get(Product_.id));
+
+        TypedQuery<Object[]> query = entityManager.createQuery(criteriaQuery);
+        // System.out.println(query.getResultList());
+
+        List<Object[]> results = query.getResultList();
+
+        for (Object[] array : results) {
+            for (Object object : array) {
+                System.out.print(object + "\t");
+            }
+            System.out.println("");
         }
 
     }

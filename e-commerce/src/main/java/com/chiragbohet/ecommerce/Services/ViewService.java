@@ -3,6 +3,8 @@ package com.chiragbohet.ecommerce.Services;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category;
 import com.chiragbohet.ecommerce.Entities.CategoryRelated.Category_;
 import com.chiragbohet.ecommerce.Entities.ProductRelated.Product;
+import com.chiragbohet.ecommerce.Entities.ProductRelated.ProductVariation;
+import com.chiragbohet.ecommerce.Entities.ProductRelated.Product_;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Customer;
 import com.chiragbohet.ecommerce.Entities.UserRelated.Seller;
 import com.chiragbohet.ecommerce.Entities.UserRelated.User;
@@ -55,7 +57,7 @@ public class ViewService {
         modelAndView.addObject("categoryList", categoriesWithProductCount);
 
         //adding product details
-        List<Object[]> productListWithStockCount = productRepository.getAllActiveProductsWithCumulativeStockCount();
+        List<Object[]> productListWithStockCount = getAllActiveProductsWithCumulativeStockCountByCriteriaQuery();
         modelAndView.addObject("productList", productListWithStockCount);
 
 
@@ -124,6 +126,23 @@ public class ViewService {
         criteriaQuery.groupBy(categoryRoot.get(Category_.id));
 
         TypedQuery<Object[]> query = entityManager.createQuery(criteriaQuery);
+        return query.getResultList();
+    }
+
+    public List<Object[]> getAllActiveProductsWithCumulativeStockCountByCriteriaQuery() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Object[]> criteriaQuery = criteriaBuilder.createQuery(Object[].class);
+
+        Root<Product> productRoot = criteriaQuery.from(Product.class);
+
+        Join<Product, ProductVariation> productProductVariationJoin = productRoot.join(Product_.productVariationSet, JoinType.LEFT);
+
+        criteriaQuery.multiselect(productRoot.get(Product_.id), productRoot.get(Product_.name), criteriaBuilder.sum(productProductVariationJoin.get("quantityAvailable")));
+        criteriaQuery.where(criteriaBuilder.and(criteriaBuilder.isFalse(productRoot.get(Product_.isDeleted))), criteriaBuilder.isTrue(productRoot.get(Product_.isActive)));
+        criteriaQuery.groupBy(productRoot.get(Product_.id));
+
+        TypedQuery<Object[]> query = entityManager.createQuery(criteriaQuery);
+
         return query.getResultList();
     }
 
