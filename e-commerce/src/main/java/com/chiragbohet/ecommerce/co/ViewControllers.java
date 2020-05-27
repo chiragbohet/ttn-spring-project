@@ -1,6 +1,6 @@
 package com.chiragbohet.ecommerce.co;
 
-import com.chiragbohet.ecommerce.Services.ViewService;
+import com.chiragbohet.ecommerce.services.ViewService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;

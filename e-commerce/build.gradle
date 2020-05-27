@@ -56,7 +56,6 @@ dependencies {
 		options.annotationProcessorGeneratedSourcesDirectory = file("src/generated/java")
 	}
 
-
 	sourceSets {
 		generated {
 			java {
@@ -64,6 +63,10 @@ dependencies {
 			}
 		}
 	}
+
+	//For RabbitMQ
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-amqp
+	compile group: 'org.springframework.boot', name: 'spring-boot-starter-amqp', version: '2.3.0.RELEASE'
 
 }
 
