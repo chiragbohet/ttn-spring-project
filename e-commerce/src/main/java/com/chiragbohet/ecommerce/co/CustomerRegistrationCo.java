@@ -1,4 +1,4 @@
-package com.chiragbohet.ecommerce.dtos.RegistrationApi;
+package com.chiragbohet.ecommerce.co;
 
 import com.chiragbohet.ecommerce.utilities.GlobalVariables;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
-public class CustomerRegistrationDto extends UserRegistrationDto {
+public class CustomerRegistrationCo extends UserRegistrationCo {
 
     @Pattern(regexp = GlobalVariables.REGEX_MOBILE_NUMBER, message = "Please enter a valid mobile number")
     @NotNull(message = "Contact number cannot be null!")

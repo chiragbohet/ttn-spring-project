@@ -1,4 +1,4 @@
-package com.chiragbohet.ecommerce.dtos.RegistrationApi;
+package com.chiragbohet.ecommerce.co;
 
 import com.chiragbohet.ecommerce.entities.Address;
 import com.chiragbohet.ecommerce.utilities.GlobalVariables;
@@ -10,7 +10,7 @@ import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
-public class SellerRegistrationDto extends UserRegistrationDto {
+public class SellerRegistrationCo extends UserRegistrationCo {
 
     @NotNull(message = "GST cannot be null!")
     @Pattern(regexp = GlobalVariables.REGEX_GST_NUMBER, message = "Please enter a valid GST Number!")

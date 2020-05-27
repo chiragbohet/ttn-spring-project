@@ -1,9 +1,9 @@
 package com.chiragbohet.ecommerce.controllers;
 
+import com.chiragbohet.ecommerce.co.CustomerRegistrationCo;
+import com.chiragbohet.ecommerce.co.SellerRegistrationCo;
 import com.chiragbohet.ecommerce.dtos.PasswordUpdateDto;
-import com.chiragbohet.ecommerce.dtos.RegistrationApi.CustomerRegistrationDto;
 import com.chiragbohet.ecommerce.dtos.RegistrationApi.EmailDto;
-import com.chiragbohet.ecommerce.dtos.RegistrationApi.SellerRegistrationDto;
 import com.chiragbohet.ecommerce.services.CustomerService;
 import com.chiragbohet.ecommerce.services.SellerService;
 import io.swagger.annotations.Api;
@@ -27,13 +27,13 @@ public class RegistrationController {
 
     @ApiOperation("Register a new Customer")
     @PostMapping("/register/customer")
-    ResponseEntity registerCustomer(@Valid @RequestBody CustomerRegistrationDto customerRegistrationDto){
+    ResponseEntity registerCustomer(@Valid @RequestBody CustomerRegistrationCo customerRegistrationDto) {
         return customerService.registerNewCustomer(customerRegistrationDto);
     }
 
     @ApiOperation("Register a new Seller")
     @PostMapping("/register/seller")
-    ResponseEntity registerSeller(@Valid @RequestBody SellerRegistrationDto sellerRegistrationDto){
+    ResponseEntity registerSeller(@Valid @RequestBody SellerRegistrationCo sellerRegistrationDto) {
         return sellerService.registerNewSeller(sellerRegistrationDto);
     }
 

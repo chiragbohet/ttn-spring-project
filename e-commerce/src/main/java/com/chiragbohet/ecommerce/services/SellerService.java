@@ -1,9 +1,9 @@
 package com.chiragbohet.ecommerce.services;
 
+import com.chiragbohet.ecommerce.co.SellerRegistrationCo;
 import com.chiragbohet.ecommerce.dtos.AdminApi.SellerAdminApiDto;
 import com.chiragbohet.ecommerce.dtos.NewAddressDto;
 import com.chiragbohet.ecommerce.dtos.PasswordUpdateDto;
-import com.chiragbohet.ecommerce.dtos.RegistrationApi.SellerRegistrationDto;
 import com.chiragbohet.ecommerce.dtos.SellerApi.SellerDetailsDto;
 import com.chiragbohet.ecommerce.dtos.SellerApi.SellerProfileUpdateDto;
 import com.chiragbohet.ecommerce.entities.Address;
@@ -111,15 +111,15 @@ public class SellerService {
     }
 
 
-        public ResponseEntity registerNewSeller(SellerRegistrationDto sellerRegistrationDto){
+    public ResponseEntity registerNewSeller(SellerRegistrationCo sellerRegistrationDto) {
 
         Seller seller = modelMapper.map(sellerRegistrationDto, Seller.class);
 
-        if(userRepository.findByEmail(seller.getEmail()) != null)   // TODO : For now customer and seller cannot have same email id
+        if (userRepository.findByEmail(seller.getEmail()) != null)   // TODO : For now customer and seller cannot have same email id
             throw new UserAlreadyExistsException("User already exists with email : " + seller.getEmail());
-        else if(sellerRepository.findByGst(sellerRegistrationDto.getGst()) != null)
+        else if (sellerRepository.findByGst(sellerRegistrationDto.getGst()) != null)
             throw new UserAlreadyExistsException("A seller already exists with the given GST number : " + seller.getGst());
-        else if(sellerRepository.findByCompanyNameIgnoreCase(seller.getCompanyName()) != null)
+        else if (sellerRepository.findByCompanyNameIgnoreCase(seller.getCompanyName()) != null)
             throw new UserAlreadyExistsException("Company already exists with the given name : " + seller.getCompanyName());
         else
             {

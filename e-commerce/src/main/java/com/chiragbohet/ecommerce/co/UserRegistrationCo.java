@@ -1,4 +1,4 @@
-package com.chiragbohet.ecommerce.dtos.RegistrationApi;
+package com.chiragbohet.ecommerce.co;
 
 import com.chiragbohet.ecommerce.utilities.GlobalVariables;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
-public class UserRegistrationDto {
+public class UserRegistrationCo {
 
 
     @Pattern(regexp = GlobalVariables.REGEX_EMAIL, message = "Please enter a valid email address!")

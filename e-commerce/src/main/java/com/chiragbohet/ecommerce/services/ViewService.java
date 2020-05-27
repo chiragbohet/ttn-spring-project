@@ -1,8 +1,6 @@
 package com.chiragbohet.ecommerce.services;
 
 import com.chiragbohet.ecommerce.entities.*;
-import com.chiragbohet.ecommerce.entities.CategoryRelated.Category_;
-import com.chiragbohet.ecommerce.entities.ProductRelated.Product_;
 import com.chiragbohet.ecommerce.repositories.CategoryRepository;
 import com.chiragbohet.ecommerce.repositories.ProductRepository;
 import com.chiragbohet.ecommerce.repositories.UserRepository;
