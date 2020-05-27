@@ -7,7 +7,7 @@ import com.chiragbohet.ecommerce.dtos.CustomerApi.CustomerDetailsDto;
 import com.chiragbohet.ecommerce.dtos.CustomerApi.CustomerProfileUpdateDto;
 import com.chiragbohet.ecommerce.dtos.NewAddressDto;
 import com.chiragbohet.ecommerce.dtos.PasswordUpdateDto;
-import com.chiragbohet.ecommerce.dtos.RegistrationApi.EmailDto;
+import com.chiragbohet.ecommerce.dtos.RegistrationApi.EmailCo;
 import com.chiragbohet.ecommerce.entities.Address;
 import com.chiragbohet.ecommerce.entities.Customer;
 import com.chiragbohet.ecommerce.entities.User;
@@ -74,17 +74,17 @@ public class CustomerService {
         if (customerRepository.findByEmail(co.getEmail()) != null) // User already exists with given email
             throw new UserAlreadyExistsException("User already exists with email : " + co.getEmail());
 
-        Customer customer = modelMapper.map(co, Customer.class);   // Converting co to Actual Object
+        Customer newCustomer = modelMapper.map(co, Customer.class);   // Converting co to Actual Object
 
-        customer.addRoles(roleRepository.findByAuthority("ROLE_CUSTOMER"));
+        newCustomer.addRoles(roleRepository.findByAuthority("ROLE_CUSTOMER"));
 
-        String encyptedPassword = passwordEncoder.encode(customer.getPassword());
+        String encyptedPassword = passwordEncoder.encode(newCustomer.getPassword());
 
-        customer.setPassword(encyptedPassword);
+        newCustomer.setPassword(encyptedPassword);
 
-        customerRepository.save(customer);   // persisting the Customer
+        customerRepository.save(newCustomer);   // persisting the Customer
 
-        createCustomerActivationTokenAndSendEmail(customer);
+        createCustomerActivationTokenAndSendEmail(newCustomer);
 
         return new ResponseEntity<String>("Please check your email for further instructions.", null, HttpStatus.CREATED);
 
@@ -100,7 +100,35 @@ public class CustomerService {
         emailSenderService.sendEmail(emailSenderService.getCustomerAwaitingActivationMail(customer.getEmail(), confirmationToken.getConfirmationToken()));
     }
 
+    public ResponseEntity resendActivationLink(EmailCo emailCo) {
+
+        Customer customer = customerRepository.findByEmail(emailCo.getEmail());
+
+        if (customer == null)
+            throw new UserNotFoundException("No user found with associated with the given email!. Kindly register yourself first.");
+        if (customer.isActive())
+            return new ResponseEntity<String>("Your account is already active!", null, HttpStatus.CONFLICT);
+
+        //delete the old token if already existing
+        deleteOldConfirmationTokenIfExists(customer);
+
+        // create new token and send
+        createCustomerActivationTokenAndSendEmail(customer);
+
+        return new ResponseEntity<String>("Please check your email for new registration link!", null, HttpStatus.OK);
+
+    }
+
+    public void deleteOldConfirmationTokenIfExists(User user) {
+        ConfirmationToken tokenToDelete = confirmationTokenRepository.findByUser(user);
+
+        if (tokenToDelete != null)
+            confirmationTokenRepository.delete(tokenToDelete);
+
+    }
+
     public ResponseEntity getCustomerAddress(String email) {
+
         Customer customer = customerRepository.findByEmail(email);
 
         Set<Address> addresses = customer.getAddressSet();
@@ -297,27 +325,9 @@ public class CustomerService {
     }
 
 
+    public ResponseEntity forgotPassword(EmailCo emailCo) {
 
-
-    public ResponseEntity resendActivationLink(EmailDto emailDto) {
-
-        Customer customer = customerRepository.findByEmail(emailDto.getEmail());
-
-        if (customer == null)
-            throw new UserNotFoundException("No user found with associated with the given email!. Kindly register yourself first.");
-        else if (customer.isActive())
-            return new ResponseEntity<String>("Your account is already active!", null, HttpStatus.CONFLICT);
-        else {
-            confirmationTokenRepository.delete(confirmationTokenRepository.findByUser(customer));
-            createCustomerActivationTokenAndSendEmail(customer);
-            return new ResponseEntity<String>("Please check your email for new registration link!", null, HttpStatus.OK);
-        }
-
-    }
-
-    public ResponseEntity forgotPassword(EmailDto emailDto) {
-
-        User user = userRepository.findByEmail(emailDto.getEmail());
+        User user = userRepository.findByEmail(emailCo.getEmail());
 
         if (user == null)
             throw new UserNotFoundException("No user found with associated with the given email!. Kindly register yourself first.");

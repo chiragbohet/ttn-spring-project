@@ -51,17 +51,43 @@ public class SellerService {
     @Autowired
     RoleRepository roleRepository;
 
-    private ModelMapper modelMapper = new ModelMapper();
+    @Autowired
+    ModelMapper modelMapper;
+
+    public ResponseEntity registerNewSeller(SellerRegistrationCo co) {
+
+        if (userRepository.findByEmail(co.getEmail()) != null)   // TODO : For now customer and seller cannot have same email id
+            throw new UserAlreadyExistsException("User already exists with email : " + co.getEmail());
+
+        if (sellerRepository.findByGst(co.getGst()) != null)
+            throw new UserAlreadyExistsException("A seller already exists with the given GST number : " + co.getGst());
+
+        if (sellerRepository.findByCompanyNameIgnoreCase(co.getCompanyName()) != null)
+            throw new UserAlreadyExistsException("Company already exists with the given name : " + co.getCompanyName());
+
+        Seller newSeller = modelMapper.map(co, Seller.class);
+
+        newSeller.addRoles(roleRepository.findByAuthority("ROLE_SELLER"));
+
+        String encyptedPassword = passwordEncoder.encode(newSeller.getPassword());
+
+        newSeller.setPassword(encyptedPassword);
+
+        sellerRepository.save(newSeller);
+
+        emailSenderService.sendEmail(emailSenderService.getSellerAwaitingActivationMail(newSeller.getEmail()));
+
+        return new ResponseEntity<String>("Please check your email for further instructions.", null, HttpStatus.CREATED);
+
+    }
 
 
-    public ResponseEntity activateSeller(Long id){
+    public ResponseEntity activateSeller(Long id) {
 
         Optional<Seller> seller = sellerRepository.findById(id);
 
-        if(seller.isPresent())
-        {
-            if(!seller.get().isActive())
-            {
+        if (seller.isPresent()) {
+            if (!seller.get().isActive()) {
                 seller.get().setActive(true);
                 sellerRepository.save(seller.get());
                 emailSenderService.sendEmail(emailSenderService.getSellerActivationMail(seller.get().getEmail()));
@@ -111,26 +137,7 @@ public class SellerService {
     }
 
 
-    public ResponseEntity registerNewSeller(SellerRegistrationCo sellerRegistrationDto) {
 
-        Seller seller = modelMapper.map(sellerRegistrationDto, Seller.class);
-
-        if (userRepository.findByEmail(seller.getEmail()) != null)   // TODO : For now customer and seller cannot have same email id
-            throw new UserAlreadyExistsException("User already exists with email : " + seller.getEmail());
-        else if (sellerRepository.findByGst(sellerRegistrationDto.getGst()) != null)
-            throw new UserAlreadyExistsException("A seller already exists with the given GST number : " + seller.getGst());
-        else if (sellerRepository.findByCompanyNameIgnoreCase(seller.getCompanyName()) != null)
-            throw new UserAlreadyExistsException("Company already exists with the given name : " + seller.getCompanyName());
-        else
-            {
-                seller.addRoles(roleRepository.findByAuthority("ROLE_SELLER"));
-                String encyptedPassword = passwordEncoder.encode(seller.getPassword());
-                seller.setPassword(encyptedPassword);
-                sellerRepository.save(seller);
-                emailSenderService.sendEmail(emailSenderService.getSellerAwaitingActivationMail(seller.getEmail()));
-                return new ResponseEntity<String>("Please check your email for further instructions.",null,HttpStatus.CREATED);
-            }
-    }
 
 
     public  ResponseEntity getSellerByEmail(String email) {

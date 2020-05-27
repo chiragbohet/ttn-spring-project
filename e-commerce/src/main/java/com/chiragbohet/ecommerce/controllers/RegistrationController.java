@@ -3,7 +3,7 @@ package com.chiragbohet.ecommerce.controllers;
 import com.chiragbohet.ecommerce.co.CustomerRegistrationCo;
 import com.chiragbohet.ecommerce.co.SellerRegistrationCo;
 import com.chiragbohet.ecommerce.dtos.PasswordUpdateDto;
-import com.chiragbohet.ecommerce.dtos.RegistrationApi.EmailDto;
+import com.chiragbohet.ecommerce.dtos.RegistrationApi.EmailCo;
 import com.chiragbohet.ecommerce.services.CustomerService;
 import com.chiragbohet.ecommerce.services.SellerService;
 import io.swagger.annotations.Api;
@@ -46,14 +46,14 @@ public class RegistrationController {
 
     @ApiOperation("Resend Activation link for Customer")
     @PostMapping("/register/resend-activation-link")
-    ResponseEntity resendCustomerActivationLink(@Valid @RequestBody EmailDto emailDto) {
-        return customerService.resendActivationLink(emailDto);
+    ResponseEntity resendCustomerActivationLink(@Valid @RequestBody EmailCo emailCo) {
+        return customerService.resendActivationLink(emailCo);
     }
 
     @ApiOperation("Get a forgot password link")
     @PostMapping("/register/forgot-password")
-    ResponseEntity forgotPassword(@Valid @RequestBody EmailDto emailDto) {
-        return customerService.forgotPassword(emailDto);
+    ResponseEntity forgotPassword(@Valid @RequestBody EmailCo emailCo) {
+        return customerService.forgotPassword(emailCo);
     }
 
     @ApiOperation("Validate a forgot password request")

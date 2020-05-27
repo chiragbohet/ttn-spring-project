@@ -9,7 +9,7 @@ import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
-public class EmailDto {
+public class EmailCo {
 
     @Pattern(regexp = GlobalVariables.REGEX_EMAIL, message = "Please enter a valid email id!")
     @NotNull(message = "Please enter a email id!")
