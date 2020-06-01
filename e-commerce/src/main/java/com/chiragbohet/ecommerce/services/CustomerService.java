@@ -1,13 +1,13 @@
 package com.chiragbohet.ecommerce.services;
 
 import com.chiragbohet.ecommerce.co.CustomerRegistrationCo;
+import com.chiragbohet.ecommerce.co.EmailCo;
 import com.chiragbohet.ecommerce.dtos.AddressViewDto;
 import com.chiragbohet.ecommerce.dtos.AdminApi.CustomerAdminApiDto;
 import com.chiragbohet.ecommerce.dtos.CustomerApi.CustomerDetailsDto;
 import com.chiragbohet.ecommerce.dtos.CustomerApi.CustomerProfileUpdateDto;
 import com.chiragbohet.ecommerce.dtos.NewAddressDto;
 import com.chiragbohet.ecommerce.dtos.PasswordUpdateDto;
-import com.chiragbohet.ecommerce.dtos.RegistrationApi.EmailCo;
 import com.chiragbohet.ecommerce.entities.Address;
 import com.chiragbohet.ecommerce.entities.Customer;
 import com.chiragbohet.ecommerce.entities.User;

@@ -38,7 +38,7 @@ public class Scheduler {
     public void enableLockedAccounts() {
         log.trace("Running scheduler to unlock locked accounts...");
 
-        List<Object[]> lockedAccountEmails = loginAttemptRepository.getEmailOfAccountsLockedForSeconds(GlobalVariables.UNLOCK_ACCOUNTS_TIME_DIFFERENCE_SECONDS);  // 1 minutes
+        List<Object[]> lockedAccountEmails = loginAttemptRepository.getEmailOfAccountsLockedForSeconds(GlobalVariables.UNLOCK_ACCOUNTS_TIME_DIFFERENCE_SECONDS);
 
         if (!lockedAccountEmails.isEmpty()) {
             for (Object[] email : lockedAccountEmails) {

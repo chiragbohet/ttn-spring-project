@@ -1,4 +1,4 @@
-package com.chiragbohet.ecommerce.dtos.RegistrationApi;
+package com.chiragbohet.ecommerce.co;
 
 import com.chiragbohet.ecommerce.utilities.GlobalVariables;
 import lombok.Getter;
