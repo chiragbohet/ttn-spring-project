@@ -62,7 +62,6 @@ public class Bootstrap implements ApplicationRunner {
             addMetadataFieldValues();
             addDummyProduct();
             addDummyProductVariation();
-
         }
     }
 
