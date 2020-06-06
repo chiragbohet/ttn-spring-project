@@ -27,9 +27,15 @@ public class RabbitMQConfig {
 
         simpleMessageListenerContainer.setConnectionFactory(connectionFactory());   // Connection Details
         simpleMessageListenerContainer.setQueueNames(PRODUCT_UPDATE_QUEUE); // The queue name
-        simpleMessageListenerContainer.setMessageListener(new ProductUpdateListener());
+        simpleMessageListenerContainer.setMessageListener(getListener());
 
         return simpleMessageListenerContainer;
     }
 
+    // Not having this and explicitly creating listener object using new was causing issues with @Autowire not working inside listener, now its working fine.
+    // Ref : https://stackoverflow.com/questions/32937547/spring-autowiring-not-working-for-rabbitlistenercontainer#
+    @Bean
+    public ProductUpdateListener getListener() {
+        return new ProductUpdateListener();
+    }
 }
