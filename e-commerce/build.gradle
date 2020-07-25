@@ -66,18 +66,7 @@ dependencies {
 
 	//For RabbitMQ
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-amqp
-	compile group: 'org.springframework.boot', name: 'spring-boot-starter-amqp'
-
-	// Redis
-		// 1) Spring boot starter data Redis
-		// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis
-		compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
-
-		// 2) Jedis
-		// https://mvnrepository.com/artifact/redis.clients/jedis
-		compile group: 'redis.clients', name: 'jedis', version: '3.3.0'
-
-
+	compile group: 'org.springframework.boot', name: 'spring-boot-starter-amqp', version: '2.3.0.RELEASE'
 
 }
 
